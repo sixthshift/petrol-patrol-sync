@@ -1,5 +1,6 @@
 const axios = require('axios');
 const utils = require('../../utils');
+const _ = require('lodash');
 
 module.exports = class FuelCheck {
 
@@ -9,16 +10,25 @@ module.exports = class FuelCheck {
         this.accessToken = null;
         this.pricesData = null;
         this.referenceData = null;
+        this.hash = null;
     }
-    
+
+    // (key:string, secret:string) => (string)
     encode(key, secret) {
         return 'Basic ' + Buffer.from(key + ':' + secret).toString('base64');
     }
 
-    isInitialised() {
-        return this.apikey && this.credentials && this.accessToken && this.pricesData && this.referenceData;
+    //  (data:any) => (string)
+    fingerprint(data) {
+        return utils.hash(data);
     }
 
+    // () => (boolean)
+    isInitialised() {
+        return !!this.apikey && !!this.credentials && !!this.accessToken && !!this.pricesData && !!this.referenceData;
+    }
+
+    // (key:string, secret: string) => (object)
     async init(key, secret) {
         this.apikey = key;
         this.credentials = this.encode(key, secret);
@@ -41,6 +51,7 @@ module.exports = class FuelCheck {
         }
     }
 
+    // (credentials:string) => (object)
     async checkOrFetchAccessToken(credentials) {
         const config = {
             method: 'get',
@@ -69,6 +80,7 @@ module.exports = class FuelCheck {
             });
     }
 
+    // (apikey:string, accessToken: string) => (object)
     async fetchReferenceData(apikey, accessToken) {
         const config = {
             method: 'get',
@@ -99,6 +111,7 @@ module.exports = class FuelCheck {
             });
     }
 
+    // (apikey:string, accessToken: string) => (object)
     async fetchPricesData(apikey, accessToken) {
 
         const config = {
@@ -130,33 +143,77 @@ module.exports = class FuelCheck {
             });
     }
 
+    // () => (object)
     brands() {
         if (this.isInitialised()) {
-            return this.referenceData.brands.items;
+            const brandsData = this.referenceData.brands.items;
+            const formatBrandsData = (brand, index) => {
+                return {
+                    name: brand.name,
+                    active: true,
+                    order: index
+                };
+            };
+            return brandsData.map(formatBrandsData);
         } else {
             return null;
         }
     }
-
+    // () => (object)
     fueltypes() {
         if (this.isInitialised()) {
-            return this.referenceData.fueltypes.items;
+            const fueltypeData = this.referenceData.fueltypes.items;
+            const formatFueltypeData = (fueltype, index) => {
+                return {
+                    code: fueltype.code,
+                    name: fueltype.name,
+                    active: true,
+                    order: index,
+                };
+            };
+            return fueltypeData.map(formatFueltypeData);
         } else {
             return null;
         }
     }
 
+    // () => (object)
     prices() {
         if (this.isInitialised()) {
-            return this.pricesData;
+            const priceData = this.pricesData;
+            const formatPriceData = (price) => {
+                return {
+                    id: price.stationcode,
+                    fueltype: price.fueltype,
+                    price: price.price,
+                    timestamp: utils.toDateStamp(price.lastupdated),
+                };
+            };
+            return priceData.map(formatPriceData);
         } else {
             return null;
         }
     }
 
+    // () => (object)
     stations() {
         if (this.isInitialised()) {
-            return this.referenceData.stations.items;
+            const stationsData = this.referenceData.stations.items;
+            const formatStationData = (station) => {
+                return {
+                    id: station.code,
+                    name: station.name,
+                    brand: station.brand,
+                    active: true,
+                    location: _.merge(
+                        {
+                            latitude: station.location.latitude,
+                            longitude: station.location.longitude
+                        }, utils.splitAddress(station.address)
+                    )
+                }
+            };
+            return stationsData.map(formatStationData);
         } else {
             return null;
         }
