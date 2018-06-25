@@ -29,9 +29,9 @@ module.exports = class FuelCheck {
     }
 
     // (key:string, secret: string) => (object)
-    async init(key, secret) {
-        this.apikey = key;
-        this.credentials = this.encode(key, secret);
+    async init(fuelcheckCredentials) {
+        this.apikey = fuelcheckCredentials.key;
+        this.credentials = this.encode(fuelcheckCredentials.key, fuelcheckCredentials.secret);
         let response = await this.checkOrFetchAccessToken(this.credentials);
         if (!response.status) {
             return response;
