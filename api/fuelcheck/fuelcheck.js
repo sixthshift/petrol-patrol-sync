@@ -48,7 +48,7 @@ module.exports = class FuelCheck {
             status: true,
             responseCode: 'success',
             response: 'Initialisation successful'
-        }
+        };
     }
 
     // (credentials:string) => (object)
@@ -72,11 +72,21 @@ module.exports = class FuelCheck {
                     response: 'Access token successfully generated'
                 };
             }).catch((error) => {
-                return {
-                    status: false,
-                    responseCode: error.response.data.ErrorCode,
-                    response: error.response.data.Error
+                try {
+                    return {
+                        status: false,
+                        responseCode: error.response.data.ErrorCode,
+                        response: error.response.data.Error
+                    };
+                } catch (error) {
+                    // Error when generating error
+                    return {
+                        status: false,
+                        responseCode: 'ConnectionError',
+                        response: 'Cannot connect to Fuelcheck'
+                    };
                 }
+
             });
     }
 
@@ -101,13 +111,13 @@ module.exports = class FuelCheck {
                     status: true,
                     responseCode: 'success',
                     response: 'Reference data successfully fetched'
-                }
+                };
             }).catch((error) => {
                 return {
                     status: false,
                     responseCode: error.response.data.errorDetails.code,
                     response: error.response.data.errorDetails.message
-                }
+                };
             });
     }
 
@@ -132,14 +142,14 @@ module.exports = class FuelCheck {
                     status: true,
                     responseCode: 'success',
                     response: 'Prices data successfully fetched'
-                }
+                };
             })
             .catch((error) => {
                 return {
                     status: false,
                     responseCode: error.response.data.errorDetails.code,
                     repsonse: error.response.data.errorDetails.message
-                }
+                };
             });
     }
 
@@ -211,7 +221,7 @@ module.exports = class FuelCheck {
                             longitude: station.location.longitude
                         }, utils.splitAddress(station.address)
                     )
-                }
+                };
             };
             return stationsData.map(formatStationData);
         } else {

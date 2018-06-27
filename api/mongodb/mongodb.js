@@ -1,26 +1,40 @@
-const admin = require('firebase-admin');
-const utils = require('../../utils');
+const MongoClient = require('mongodb').MongoClient;
+const _ = require('lodash');
 
-module.exports = class FireStore {
+module.exports = class Mongo {
 
     constructor() {
-        this.firestore = null;
+        this.mongodb = null;
         this.brandsData = null;
         this.fueltypesData = null;
         this.stationsData = null;
     }
 
-    // () => (boolean)
     isInitialised() {
-        return !!this.firestore;
+        return !!this.mongodb;
     }
 
-    async init(firebaseCredentials) {
-        admin.initializeApp({
-            credential: admin.credential.cert(firebaseCredentials)
-        });
-        this.firestore = admin.firestore();
+    static buildUri(credentials) {
+        return 'mongodb://' + credentials.username + ':' + credentials.password + '@' + credentials.url + '/' + credentials.db;
+    }
+
+    static isActive(object) {
+        return object.active === true;
+    }
+
+    static omitInternalID = (object) => {
+        return _.omit(object, '_id');
+    };
+
+    static assignInternalID(documentID, document) {
+        return _.assign(document, { _id: documentID });
+    }
+
+    async init(mongoCredentials) {
+        const uri = Mongo.buildUri(mongoCredentials);
         try {
+            const mongoClient = await MongoClient.connect(uri);
+            this.mongodb = mongoClient.db(mongoCredentials.db);
             [
                 this.brandsData,
                 this.fueltypesData,
@@ -35,46 +49,33 @@ module.exports = class FireStore {
             return {
                 status: true,
                 responseCode: 'success',
-                response: 'Initialisation Successful'
+                response: 'Initialisation successful'
             };
         } catch (error) {
             return {
                 status: false,
-                responseCode: error.code,
-                response: error.details
+                responseCode: error.name,
+                response: error.message
             };
         }
     }
 
-    // (collection:string) => (Promise)
-    async fetchCollectionSnapshot(collection) {
-        return this.firestore.collection(collection).get();
-    }
-
-    // () => (object)
     async fetchCollection(collection) {
         if (this.isInitialised()) {
-            var snapshot = await this.fetchCollectionSnapshot(collection);
-            var array = [];
-            snapshot.forEach(element => {
-                array.push(element.data());
-            });
-            return array;
+            const snapshot = await this.mongodb.collection(collection).find();
+            const documents = await snapshot.toArray();
+
+            const activeDocuments = _.filter(documents, Mongo.isActive);
+            const normalisedDocuments = _.map(activeDocuments, Mongo.omitInternalID);
+            return normalisedDocuments;
         } else {
             return null;
         }
     }
 
     async setDocument(collection, documentID, document) {
-        if (this.isInitialised()) {
-            const sanitisedID = utils.sanitiseID(documentID);
-            if (sanitisedID == 17260) {
-                console.log(collection + ' ' + sanitisedID + ' ' + JSON.stringify(document));
-            }
-            return this.firestore.collection(collection).doc(sanitisedID).set(document);
-        } else {
-            return null;
-        }
+        document = Mongo.assignInternalID(documentID, document);
+        return this.mongodb.collection(collection).replaceOne({ _id: documentID }, document, { upsert: true });
     }
 
     // () => (object)
@@ -114,4 +115,4 @@ module.exports = class FireStore {
     async setStation(data) {
         return this.setDocument('stations', data.id, data);
     }
-};
+}
