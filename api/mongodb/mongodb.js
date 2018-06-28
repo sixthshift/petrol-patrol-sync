@@ -12,10 +12,6 @@ module.exports = class Mongo {
         this.pricesData = null;
     }
 
-    isInitialised() {
-        return !!this.mongodb;
-    }
-
     static buildUri(credentials) {
         return 'mongodb://' + credentials.username + ':' + credentials.password + '@' + credentials.url + '/' + credentials.db;
     }
@@ -34,6 +30,10 @@ module.exports = class Mongo {
 
     static assignInternalID(documentID, document) {
         return _.assign(document, { _id: documentID });
+    }
+
+    isInitialised() {
+        return !!this.mongodb;
     }
 
     async init(mongoCredentials) {

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const utils = require('../../utils');
+const time = require('../../util/time');
 const _ = require('lodash');
 
 module.exports = class FuelCheck {
@@ -14,13 +15,8 @@ module.exports = class FuelCheck {
     }
 
     // (key:string, secret:string) => (string)
-    encode(key, secret) {
+    static encode(key, secret) {
         return 'Basic ' + Buffer.from(key + ':' + secret).toString('base64');
-    }
-
-    //  (data:any) => (string)
-    fingerprint(data) {
-        return utils.hash(data);
     }
 
     // () => (boolean)
@@ -31,7 +27,7 @@ module.exports = class FuelCheck {
     // (key:string, secret: string) => (object)
     async init(fuelcheckCredentials) {
         this.apikey = fuelcheckCredentials.key;
-        this.credentials = this.encode(fuelcheckCredentials.key, fuelcheckCredentials.secret);
+        this.credentials = FuelCheck.encode(fuelcheckCredentials.key, fuelcheckCredentials.secret);
         let response = await this.checkOrFetchAccessToken(this.credentials);
         if (!response.status) {
             return response;
@@ -86,7 +82,6 @@ module.exports = class FuelCheck {
                         response: 'Cannot connect to Fuelcheck'
                     };
                 }
-
             });
     }
 
@@ -100,7 +95,7 @@ module.exports = class FuelCheck {
                 'Authorization': accessToken,
                 'Content-Type': 'application/json; charset=utf-8',
                 'if-modified-since': '01/01/1970 00:00:00 AM',
-                'requesttimestamp': utils.currentTimestamp(),
+                'requesttimestamp': time.currentLocalTime(),
                 'transactionid': '1'
             }
         };
@@ -113,11 +108,20 @@ module.exports = class FuelCheck {
                     response: 'Reference data successfully fetched'
                 };
             }).catch((error) => {
-                return {
-                    status: false,
-                    responseCode: error.response.data.errorDetails.code,
-                    response: error.response.data.errorDetails.message
-                };
+                try {
+                    return {
+                        status: false,
+                        responseCode: error.response.data.errorDetails.code,
+                        response: error.response.data.errorDetails.message
+                    };
+                } catch (error) {
+                    // Error when generating error
+                    return {
+                        status: false,
+                        responseCode: 'ConnectionError',
+                        response: 'Cannot connect to Fuelcheck'
+                    };
+                }
             });
     }
 
@@ -131,13 +135,19 @@ module.exports = class FuelCheck {
                 'apikey': apikey,
                 'Authorization': accessToken,
                 'Content-Type': 'application/json; charset=utf-8',
-                'requesttimestamp': utils.currentTimestamp(),
+                'requesttimestamp': time.currentLocalTime(),
                 'transactionid': '1'
             }
         };
         return await axios(config)
             .then((response) => {
                 this.pricesData = response.data.prices;
+                _.map(this.pricesData, (obj) => {
+                    const toUnixTime = (timestamp) => {
+                        return time.parseTimestamp(timestamp).getTime();
+                    };
+                    return _.update(obj, 'lastupdated', toUnixTime);
+                });
                 return {
                     status: true,
                     responseCode: 'success',
@@ -145,11 +155,21 @@ module.exports = class FuelCheck {
                 };
             })
             .catch((error) => {
-                return {
-                    status: false,
-                    responseCode: error.response.data.errorDetails.code,
-                    repsonse: error.response.data.errorDetails.message
-                };
+                try {
+                    console.log(error);
+                    return {
+                        status: false,
+                        responseCode: error.response.data.errorDetails.code,
+                        response: error.response.data.errorDetails.message,
+                    };
+                } catch (error) {
+                    // Error when generating error
+                    return {
+                        status: false,
+                        responseCode: 'ConnectionError',
+                        response: 'Cannot connect to Fuelcheck'
+                    };
+                }
             });
     }
 
@@ -166,9 +186,10 @@ module.exports = class FuelCheck {
             };
             return brandsData.map(formatBrandsData);
         } else {
-            return null;
+            return [];
         }
     }
+
     // () => (object)
     fueltypes() {
         if (this.isInitialised()) {
@@ -183,7 +204,7 @@ module.exports = class FuelCheck {
             };
             return fueltypeData.map(formatFueltypeData);
         } else {
-            return null;
+            return [];
         }
     }
 
@@ -196,12 +217,12 @@ module.exports = class FuelCheck {
                     id: price.stationcode,
                     fueltype: price.fueltype,
                     price: price.price,
-                    timestamp: utils.toDateStamp(price.lastupdated),
+                    time: price.lastupdated
                 };
             };
             return priceData.map(formatPriceData);
         } else {
-            return null;
+            return [];
         }
     }
 
@@ -225,7 +246,7 @@ module.exports = class FuelCheck {
             };
             return stationsData.map(formatStationData);
         } else {
-            return null;
+            return [];
         }
     }
 }
