@@ -1,0 +1,4 @@
+{
+    "staleThreshold": 30,
+    "abandonedThreshold": 60
+}
