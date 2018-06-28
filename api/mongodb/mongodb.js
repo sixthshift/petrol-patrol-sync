@@ -1,5 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 const _ = require('lodash');
+const utils = require('../../utils');
 
 module.exports = class Mongo {
 
@@ -8,6 +9,7 @@ module.exports = class Mongo {
         this.brandsData = null;
         this.fueltypesData = null;
         this.stationsData = null;
+        this.pricesData = null;
     }
 
     isInitialised() {
@@ -19,12 +21,16 @@ module.exports = class Mongo {
     }
 
     static isActive(object) {
-        return object.active === true;
+        if (_.has(object, 'active')) {
+            return object.active === true;
+        } else {
+            return true;
+        }
     }
 
-    static omitInternalID = (object) => {
+    static omitInternalID(object) {
         return _.omit(object, '_id');
-    };
+    }
 
     static assignInternalID(documentID, document) {
         return _.assign(document, { _id: documentID });
@@ -38,12 +44,14 @@ module.exports = class Mongo {
             [
                 this.brandsData,
                 this.fueltypesData,
-                this.stationsData
+                this.stationsData,
+                this.pricesData
             ] = await Promise.all(
                 [
                     this.fetchCollection('brands'),
                     this.fetchCollection('fueltypes'),
-                    this.fetchCollection('stations')
+                    this.fetchCollection('stations'),
+                    this.fetchCollection('prices')
                 ]
             );
             return {
@@ -69,7 +77,7 @@ module.exports = class Mongo {
             const normalisedDocuments = _.map(activeDocuments, Mongo.omitInternalID);
             return normalisedDocuments;
         } else {
-            return null;
+            return [];
         }
     }
 
@@ -83,12 +91,12 @@ module.exports = class Mongo {
         if (this.isInitialised()) {
             return this.fueltypesData;
         } else {
-            return null;
+            return [];
         }
     }
 
-    async setFueltype(data) {
-        return this.setDocument('fueltypes', data.code, data);
+    async setFueltype(document) {
+        return this.setDocument('fueltypes', document.code, document);
     }
 
     // () => (object)
@@ -96,23 +104,36 @@ module.exports = class Mongo {
         if (this.isInitialised()) {
             return this.brandsData;
         } else {
-            return null;
+            return [];
         }
     }
 
-    async setBrand(data) {
-        return this.setDocument('brands', data.name, data);
+    async setBrand(document) {
+        return this.setDocument('brands', document.name, document);
     }
 
     stations() {
         if (this.isInitialised()) {
             return this.stationsData;
         } else {
-            return null;
+            return [];
         }
     }
 
-    async setStation(data) {
-        return this.setDocument('stations', data.id, data);
+    async setStation(document) {
+        return this.setDocument('stations', document.id, document);
+    }
+
+    prices() {
+        if (this.isInitialised()) {
+            return this.pricesData;
+        } else {
+            return [];
+        }
+    }
+
+    async setPrice(document) {
+        const hashID = utils.hash(_.pick(document, ['id', 'fueltype']));
+        return this.setDocument('prices', hashID, document);
     }
 }
