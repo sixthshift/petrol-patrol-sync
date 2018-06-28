@@ -61,7 +61,7 @@ module.exports = class FireStore {
             });
             return array;
         } else {
-            return null;
+            return [];
         }
     }
 
@@ -73,7 +73,7 @@ module.exports = class FireStore {
             }
             return this.firestore.collection(collection).doc(sanitisedID).set(document);
         } else {
-            return null;
+            return [];
         }
     }
 
@@ -82,12 +82,12 @@ module.exports = class FireStore {
         if (this.isInitialised()) {
             return this.fueltypesData;
         } else {
-            return null;
+            return [];
         }
     }
 
-    async setFueltype(data) {
-        return this.setDocument('fueltypes', data.code, data);
+    async setFueltype(document) {
+        return this.setDocument('fueltypes', document.code, document);
     }
 
     // () => (object)
@@ -95,23 +95,23 @@ module.exports = class FireStore {
         if (this.isInitialised()) {
             return this.brandsData;
         } else {
-            return null;
+            return [];
         }
     }
 
-    async setBrand(data) {
-        return this.setDocument('brands', data.name, data);
+    async setBrand(document) {
+        return this.setDocument('brands', document.name, document);
     }
 
     stations() {
         if (this.isInitialised()) {
             return this.stationsData;
         } else {
-            return null;
+            return [];
         }
     }
 
-    async setStation(data) {
-        return this.setDocument('stations', data.id, data);
+    async setStation(document) {
+        return this.setDocument('stations', document.id, document);
     }
 };
