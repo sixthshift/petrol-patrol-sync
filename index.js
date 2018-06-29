@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 const utils = require('./utils');
+const time = require('./util/time');
+const constants = require('./constants');
 
 const FuelCheck = require('./api/fuelcheck/fuelcheck');
 const MongoDB = require('./api/mongodb/mongodb');
@@ -97,24 +99,40 @@ syncPrices = async (fuelcheck, database) => {
     const fuelcheckPrices = fuelcheck.prices();
 
     const toBeUpdated = utils.difference(fuelcheckPrices, databasePrices);
-    const notUpdated = utils.difference(fuelcheckPrices, toBeUpdated);
-    // const toBeStale = _.map(notUpdated, (obj) => { });
+    const toBePreserved = utils.difference(databasePrices, fuelcheckPrices);
+
+    const activePrices = _.union(toBeUpdated, toBePreserved);
+    const ageAdjustedActivePrices = _.map(activePrices, agePrices);
 
     let promises = [];
     _.each(toBeUpdated, (activated) => {
         promises.push(database.setPrice(activated));
     });
 
+
+
     await Promise.all(promises);
 
     return {
         toBeUpdated: toBeUpdated,
-        notUpdated: notUpdated
+        toBePreserved: toBePreserved
     };
 }
 
-isPriceStale = (price) => {
-    priceTimestamp = utils.decomposeTimestamp(price.timestamp);
+agePrices = (price) => {
+    return _.update(price, 'stale', isStale);
+}
+
+isStale = (price) => {
+    const then = time.parseUnix(price.time);
+    const now = time.now();
+    return time.diff(then, now) >= constants.staleThreshold;
+}
+
+isExpired = (price) => {
+    const then = time.parseUnix(price.timestamp);
+    const now = time.now();
+    return time.diff(then, now) >= constants.expiredThreshold;
 }
 
 isError = (result) => {
@@ -156,6 +174,7 @@ main = async () => {
 
     const syncResults = await Promise.all(syncPromises);
     console.log(JSON.stringify(syncResults));
+
 };
 
 main().then(() => {

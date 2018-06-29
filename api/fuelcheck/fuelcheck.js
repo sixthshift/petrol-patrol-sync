@@ -94,8 +94,8 @@ module.exports = class FuelCheck {
                 'apikey': apikey,
                 'Authorization': accessToken,
                 'Content-Type': 'application/json; charset=utf-8',
-                'if-modified-since': '01/01/1970 00:00:00 AM',
-                'requesttimestamp': time.currentLocalTime(),
+                'if-modified-since': time.epoch().format(time.formatString),
+                'requesttimestamp': time.now().format(time.formatString),
                 'transactionid': '1'
             }
         };
@@ -135,19 +135,19 @@ module.exports = class FuelCheck {
                 'apikey': apikey,
                 'Authorization': accessToken,
                 'Content-Type': 'application/json; charset=utf-8',
-                'requesttimestamp': time.currentLocalTime(),
+                'requesttimestamp': time.now().format(time.formatString),
                 'transactionid': '1'
             }
         };
         return await axios(config)
             .then((response) => {
-                this.pricesData = response.data.prices;
-                _.map(this.pricesData, (obj) => {
-                    const toUnixTime = (timestamp) => {
-                        return time.parseTimestamp(timestamp).getTime();
-                    };
-                    return _.update(obj, 'lastupdated', toUnixTime);
-                });
+                const toUnix = (price) => {
+                    const unixTime = time.parseTimestamp(price.lastupdated).unix();
+                    return _.update(price, 'lastupdated', (price) => {
+                        return unixTime;
+                    });
+                };
+                this.pricesData = _.map(response.data.prices, toUnix);
                 return {
                     status: true,
                     responseCode: 'success',
@@ -217,7 +217,8 @@ module.exports = class FuelCheck {
                     id: price.stationcode,
                     fueltype: price.fueltype,
                     price: price.price,
-                    time: price.lastupdated
+                    time: price.lastupdated,
+                    stale: false
                 };
             };
             return priceData.map(formatPriceData);
