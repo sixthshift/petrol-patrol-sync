@@ -1,4 +1,4 @@
 {
     "staleThreshold": 30,
-    "abandonedThreshold": 60
+    "expiredThreshold": 60
 }
