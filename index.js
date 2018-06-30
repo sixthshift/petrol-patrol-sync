@@ -15,6 +15,26 @@ const firebaseCredentials = require('./api/firebase/firebase-credentials');
 const fuelcheckCredentials = require('./api/fuelcheck/fuelcheck-credentials');
 const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
 
+
+
+isExpired = (price) => {
+    const then = time.parseUnix(price.time);
+    const now = time.now();
+    return time.diff(then, now) >= constants.expiredThreshold;
+}
+
+agePrice = (price) => {
+    return _.set(price, 'stale', isStale(price));
+};
+
+isError = (result) => {
+    try {
+        return result.status == false;
+    } catch (error) {
+        return true;
+    }
+};
+
 syncBrands = async (fuelcheck, database) => {
 
     const databaseBrands = database.brands();
@@ -98,50 +118,27 @@ syncPrices = async (fuelcheck, database) => {
     const databasePrices = database.prices();
     const fuelcheckPrices = fuelcheck.prices();
 
-    const toBeUpdated = utils.difference(fuelcheckPrices, databasePrices);
-    const toBePreserved = utils.difference(databasePrices, fuelcheckPrices);
-
-    const activePrices = _.union(toBeUpdated, toBePreserved);
-    const ageAdjustedActivePrices = _.map(activePrices, agePrices);
+    let toBeUpdated = utils.difference(fuelcheckPrices, databasePrices);
+    let toBePreserved = utils.difference(databasePrices, toBeUpdated);
+    let toBeExpired = _.union(toBeUpdated, toBePreserved).filter(isExpired);
 
     let promises = [];
-    _.each(toBeUpdated, (activated) => {
-        promises.push(database.setPrice(activated));
+
+    _.each(toBeUpdated, (price) => {
+        promises.push(database.setPrice(price));
     });
 
-
+    _.each(toBeExpired, (price) => {
+        promises.push(database.unsetPrice(price));
+    });
 
     await Promise.all(promises);
 
     return {
         toBeUpdated: toBeUpdated,
-        toBePreserved: toBePreserved
+        toBeExpired: toBeExpired
     };
 }
-
-agePrices = (price) => {
-    return _.update(price, 'stale', isStale);
-}
-
-isStale = (price) => {
-    const then = time.parseUnix(price.time);
-    const now = time.now();
-    return time.diff(then, now) >= constants.staleThreshold;
-}
-
-isExpired = (price) => {
-    const then = time.parseUnix(price.timestamp);
-    const now = time.now();
-    return time.diff(then, now) >= constants.expiredThreshold;
-}
-
-isError = (result) => {
-    try {
-        return result.status == false;
-    } catch (error) {
-        return true;
-    }
-};
 
 main = async () => {
 
@@ -150,14 +147,8 @@ main = async () => {
     const fuelcheck = new FuelCheck();
     initialisationPromises.push(fuelcheck.init(fuelcheckCredentials));
 
-    // const database = new Database();
-    // database.init(firebaseCredentials);
-
     const mongodb = new MongoDB();
     initialisationPromises.push(mongodb.init(mongodbCredentials));
-
-    // const firestore = new FireStore();
-    // initialisationPromises.push(firestore.init(firebaseCredentials));
 
     const initialisationResults = await Promise.all(initialisationPromises);
     const initialisationErrors = _.filter(initialisationResults, isError);

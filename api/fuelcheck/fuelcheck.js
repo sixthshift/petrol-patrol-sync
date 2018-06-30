@@ -1,4 +1,5 @@
 const axios = require('axios');
+const constants = require('../../constants');
 const utils = require('../../utils');
 const time = require('../../util/time');
 const _ = require('lodash');
@@ -9,9 +10,10 @@ module.exports = class FuelCheck {
         this.apikey = null;
         this.credentials = null;
         this.accessToken = null;
+        this.brandsData = null;
+        this.fueltypesData = null;
         this.pricesData = null;
-        this.referenceData = null;
-        this.hash = null;
+        this.stationsData = null;
     }
 
     // (key:string, secret:string) => (string)
@@ -21,7 +23,21 @@ module.exports = class FuelCheck {
 
     // () => (boolean)
     isInitialised() {
-        return !!this.apikey && !!this.credentials && !!this.accessToken && !!this.pricesData && !!this.referenceData;
+        return (
+            !!this.apikey
+            && !!this.credentials
+            && !!this.accessToken
+            && !!this.brandsData
+            && !!this.fueltypesData
+            && !!this.pricesData
+            && !!this.stationsData
+        );
+    }
+
+    static isStale(thenTime) {
+        const then = time.parseTimestamp(thenTime);
+        const now = time.now();
+        return time.diff(then, now) >= constants.staleThreshold;
     }
 
     // (key:string, secret: string) => (object)
@@ -101,7 +117,40 @@ module.exports = class FuelCheck {
         };
         return await axios(config)
             .then((response) => {
-                this.referenceData = response.data;
+                const rebuildBrand = (brand, index) => {
+                    return {
+                        name: brand.name,
+                        active: true,
+                        order: index
+                    };
+                };
+                this.brandsData = response.data.brands.items.map(rebuildBrand);
+
+                const rebuildFueltypeData = (fueltype, index) => {
+                    return {
+                        code: fueltype.code,
+                        name: fueltype.name,
+                        active: true,
+                        order: index,
+                    };
+                };
+                this.fueltypesData = response.data.fueltypes.items.map(rebuildFueltypeData);
+
+                const rebuildStationData = (station) => {
+                    return {
+                        id: station.code,
+                        name: station.name,
+                        brand: station.brand,
+                        active: true,
+                        location: _.merge(
+                            {
+                                latitude: station.location.latitude,
+                                longitude: station.location.longitude
+                            }, utils.splitAddress(station.address)
+                        )
+                    };
+                };
+                this.stationsData = response.data.stations.items.map(rebuildStationData);
                 return {
                     status: true,
                     responseCode: 'success',
@@ -127,7 +176,6 @@ module.exports = class FuelCheck {
 
     // (apikey:string, accessToken: string) => (object)
     async fetchPricesData(apikey, accessToken) {
-
         const config = {
             method: 'get',
             url: 'https://api.onegov.nsw.gov.au/FuelPriceCheck/v1/fuel/prices',
@@ -141,13 +189,16 @@ module.exports = class FuelCheck {
         };
         return await axios(config)
             .then((response) => {
-                const toUnix = (price) => {
-                    const unixTime = time.parseTimestamp(price.lastupdated).unix();
-                    return _.update(price, 'lastupdated', (price) => {
-                        return unixTime;
-                    });
+                const rebuildPrice = (price) => {
+                    return {
+                        id: price.stationcode,
+                        fueltype: price.fueltype,
+                        price: price.price,
+                        time: time.parseTimestamp(price.lastupdated).unix(),
+                        stale: FuelCheck.isStale(price.lastupdated),
+                    };
                 };
-                this.pricesData = _.map(response.data.prices, toUnix);
+                this.pricesData = _.map(response.data.prices, rebuildPrice);
                 return {
                     status: true,
                     responseCode: 'success',
@@ -156,7 +207,6 @@ module.exports = class FuelCheck {
             })
             .catch((error) => {
                 try {
-                    console.log(error);
                     return {
                         status: false,
                         responseCode: error.response.data.errorDetails.code,
@@ -176,15 +226,7 @@ module.exports = class FuelCheck {
     // () => (object)
     brands() {
         if (this.isInitialised()) {
-            const brandsData = this.referenceData.brands.items;
-            const formatBrandsData = (brand, index) => {
-                return {
-                    name: brand.name,
-                    active: true,
-                    order: index
-                };
-            };
-            return brandsData.map(formatBrandsData);
+            return this.brandsData;
         } else {
             return [];
         }
@@ -193,16 +235,7 @@ module.exports = class FuelCheck {
     // () => (object)
     fueltypes() {
         if (this.isInitialised()) {
-            const fueltypeData = this.referenceData.fueltypes.items;
-            const formatFueltypeData = (fueltype, index) => {
-                return {
-                    code: fueltype.code,
-                    name: fueltype.name,
-                    active: true,
-                    order: index,
-                };
-            };
-            return fueltypeData.map(formatFueltypeData);
+            return this.fueltypesData;
         } else {
             return [];
         }
@@ -211,17 +244,7 @@ module.exports = class FuelCheck {
     // () => (object)
     prices() {
         if (this.isInitialised()) {
-            const priceData = this.pricesData;
-            const formatPriceData = (price) => {
-                return {
-                    id: price.stationcode,
-                    fueltype: price.fueltype,
-                    price: price.price,
-                    time: price.lastupdated,
-                    stale: false
-                };
-            };
-            return priceData.map(formatPriceData);
+            return this.pricesData;
         } else {
             return [];
         }
@@ -230,22 +253,7 @@ module.exports = class FuelCheck {
     // () => (object)
     stations() {
         if (this.isInitialised()) {
-            const stationsData = this.referenceData.stations.items;
-            const formatStationData = (station) => {
-                return {
-                    id: station.code,
-                    name: station.name,
-                    brand: station.brand,
-                    active: true,
-                    location: _.merge(
-                        {
-                            latitude: station.location.latitude,
-                            longitude: station.location.longitude
-                        }, utils.splitAddress(station.address)
-                    )
-                };
-            };
-            return stationsData.map(formatStationData);
+            return this.stationsData;
         } else {
             return [];
         }

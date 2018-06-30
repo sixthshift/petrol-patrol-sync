@@ -86,6 +86,10 @@ module.exports = class Mongo {
         return this.mongodb.collection(collection).replaceOne({ _id: documentID }, document, { upsert: true });
     }
 
+    async unsetDocument(collection, documentID) {
+        return this.mongodb.collection(collection).deleteOne({ _id: documentID });
+    }
+
     // () => (object)
     fueltypes() {
         if (this.isInitialised()) {
@@ -135,5 +139,10 @@ module.exports = class Mongo {
     async setPrice(document) {
         const hashID = utils.hash(_.pick(document, ['id', 'fueltype']));
         return this.setDocument('prices', hashID, document);
+    }
+
+    async unsetPrice(document) {
+        const hashID = utils.hash(_.pick(document, ['id', 'fueltype']));
+        return this.unsetDocument('prices', hashID);
     }
 }
