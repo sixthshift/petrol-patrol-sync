@@ -164,7 +164,7 @@ main = async () => {
     syncPromises.push(syncPrices(fuelcheck, mongodb));
 
     const syncResults = await Promise.all(syncPromises);
-    console.log(JSON.stringify(syncResults));
+    console.log(JSON.stringify(syncResults, null, 2));
 
 };
 

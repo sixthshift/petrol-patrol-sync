@@ -57,6 +57,18 @@ module.exports = class FuelCheck {
     }
 
     /**
+     * Determines whether a given price is older than {constants.expiredThreshold} days ago
+     * 
+     * @param {string} thenTime 
+     * @returns {boolean}
+     */
+    isExpired(price) {
+        const then = time.parseUnix(price.time);
+        const now = time.now();
+        return time.diff(then, now) >= constants.expiredThreshold;
+    }
+
+    /**
      * Initialises self with the given credentials
      * 
      * @param {object} fuelcheckCredentials
@@ -235,7 +247,9 @@ module.exports = class FuelCheck {
                         stale: FuelCheck.isStale(price.lastupdated),
                     };
                 };
-                this.pricesData = _.map(response.data.prices, rebuildPrice);
+                const rebuiltPrices = _.map(response.data.prices, rebuildPrice);
+                const activePrices = _.reject(rebuiltPrices, isExpired);
+                this.pricesData = activePrices;
                 return {
                     status: true,
                     responseCode: 'success',
