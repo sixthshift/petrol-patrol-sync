@@ -20,6 +20,14 @@ module.exports = class Database {
             databaseURL: "https://petrol-patrol.firebaseio.com"
         });
         this.database = admin.database();
+
+        return {
+            status: true,
+            responseCode: 'success',
+            response: 'Initialisation successful'
+        };
     }
+
+
 
 };

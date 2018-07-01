@@ -2,7 +2,7 @@ const MongoClient = require('mongodb').MongoClient;
 const _ = require('lodash');
 const utils = require('../../utils');
 
-module.exports = class Mongo {
+module.exports = class MongoDB {
 
     constructor() {
         this.mongodb = null;
@@ -74,7 +74,7 @@ module.exports = class Mongo {
      * @returns {object} The response status of the method
      */
     async init(mongoCredentials) {
-        const uri = Mongo.buildUri(mongoCredentials);
+        const uri = MongoDB.buildUri(mongoCredentials);
         try {
             const mongoClient = await MongoClient.connect(uri);
             this.mongodb = mongoClient.db(mongoCredentials.db);
@@ -116,8 +116,8 @@ module.exports = class Mongo {
             const snapshot = await this.mongodb.collection(collection).find();
             const documents = await snapshot.toArray();
 
-            const activeDocuments = _.filter(documents, Mongo.isActive);
-            const normalisedDocuments = _.map(activeDocuments, Mongo.omitInternalID);
+            const activeDocuments = _.filter(documents, MongoDB.isActive);
+            const normalisedDocuments = _.map(activeDocuments, MongoDB.omitInternalID);
             return normalisedDocuments;
         } else {
             return [];
@@ -133,7 +133,7 @@ module.exports = class Mongo {
      * @returns {Promise}
      */
     async setDocument(collection, documentID, document) {
-        document = Mongo.assignInternalID(documentID, document);
+        document = MongoDB.assignInternalID(documentID, document);
         return this.mongodb.collection(collection).replaceOne({ _id: documentID }, document, { upsert: true });
     }
 

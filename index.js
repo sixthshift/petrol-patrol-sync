@@ -1,21 +1,18 @@
 #!/usr/bin/node
 
 const _ = require('lodash');
-const utils = require('./utils');
-const time = require('./util/time');
 const constants = require('./constants');
+const time = require('./util/time');
+const utils = require('./utils');
 
+const FireDB = require('./api/firebase/firedb');
 const FuelCheck = require('./api/fuelcheck/fuelcheck');
 const MongoDB = require('./api/mongodb/mongodb');
-const Database = require('./api/firebase/database');
-const FireStore = require('./api/firebase/firestore');
 
 // Credentials need to be retrieved from the corresponding Api services.
 const firebaseCredentials = require('./api/firebase/firebase-credentials');
 const fuelcheckCredentials = require('./api/fuelcheck/fuelcheck-credentials');
 const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
-
-
 
 isExpired = (price) => {
     const then = time.parseUnix(price.time);
@@ -150,21 +147,25 @@ main = async () => {
     const mongodb = new MongoDB();
     initialisationPromises.push(mongodb.init(mongodbCredentials));
 
+    const firedb = new FireDB();
+    initialisationPromises.push(firedb.init(firebaseCredentials));
+
     const initialisationResults = await Promise.all(initialisationPromises);
     const initialisationErrors = _.filter(initialisationResults, isError);
     if (!_.isEmpty(initialisationErrors)) {
+        console.log('test');
         console.error(initialisationErrors);
     }
 
-    const syncPromises = [];
+    // const syncPromises = [];
 
-    syncPromises.push(syncBrands(fuelcheck, mongodb));
-    syncPromises.push(syncFueltypes(fuelcheck, mongodb));
-    syncPromises.push(syncStations(fuelcheck, mongodb));
-    syncPromises.push(syncPrices(fuelcheck, mongodb));
+    // syncPromises.push(syncBrands(fuelcheck, mongodb));
+    // syncPromises.push(syncFueltypes(fuelcheck, mongodb));
+    // syncPromises.push(syncStations(fuelcheck, mongodb));
+    // syncPromises.push(syncPrices(fuelcheck, mongodb));
 
-    const syncResults = await Promise.all(syncPromises);
-    console.log(JSON.stringify(syncResults));
+    // const syncResults = await Promise.all(syncPromises);
+    // console.log(JSON.stringify(syncResults));
 
 };
 
