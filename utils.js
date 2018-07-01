@@ -9,6 +9,9 @@ module.exports = {
     difference: (toInspect, toExclude) => {
         return _.differenceWith(toInspect, toExclude, _.isEqual);
     },
+    emptyPromise: (val = null) => {
+        return new Promise((resolve) => { resolve(val); });
+    },
     geoEncode: (latitude, longitude) => {
         let hash = '';
         let bits = 0;

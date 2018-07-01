@@ -133,8 +133,12 @@ module.exports = class MongoDB {
      * @returns {Promise}
      */
     async setDocument(collection, documentID, document) {
-        document = MongoDB.assignInternalID(documentID, document);
-        return this.mongodb.collection(collection).replaceOne({ _id: documentID }, document, { upsert: true });
+        if (this.isInitialised()) {
+            document = MongoDB.assignInternalID(documentID, document);
+            return this.mongodb.collection(collection).replaceOne({ _id: documentID }, document, { upsert: true });
+        } else {
+            return utils.emptyPromise();
+        }
     }
 
     /**
@@ -145,7 +149,11 @@ module.exports = class MongoDB {
      * @returns {Promise}
      */
     async unsetDocument(collection, documentID) {
-        return this.mongodb.collection(collection).deleteOne({ _id: documentID });
+        if (this.isInitialised()) {
+            return this.mongodb.collection(collection).deleteOne({ _id: documentID });
+        } else {
+            return utils.emptyPromise();
+        }
     }
 
     /**
@@ -168,7 +176,11 @@ module.exports = class MongoDB {
      * @returns {Promise}
      */
     async setBrand(brand) {
-        return this.setDocument('brands', brand.name, brand);
+        if (this.isInitialised()) {
+            return this.setDocument('brands', brand.name, brand);
+        } else {
+            return utils.emptyPromise();
+        }
     }
 
     /**
@@ -214,8 +226,12 @@ module.exports = class MongoDB {
      * @returns {Promise}
      */
     async setPrice(price) {
-        const hashID = utils.hash(_.pick(price, ['id', 'fueltype']));
-        return this.setDocument('prices', hashID, price);
+        if (this.isInitialised()) {
+            const hashID = utils.hash(_.pick(price, ['id', 'fueltype']));
+            return this.setDocument('prices', hashID, price);
+        } else {
+            return utils.emptyPromise();
+        }
     }
 
     /**
@@ -225,8 +241,12 @@ module.exports = class MongoDB {
      * @returns {Promise}
      */
     async unsetPrice(price) {
-        const hashID = utils.hash(_.pick(price, ['id', 'fueltype']));
-        return this.unsetDocument('prices', hashID);
+        if (this.isInitialised()) {
+            const hashID = utils.hash(_.pick(price, ['id', 'fueltype']));
+            return this.unsetDocument('prices', hashID);
+        } else {
+            return utils.emptyPromise();
+        }
     }
 
     /**
@@ -249,6 +269,10 @@ module.exports = class MongoDB {
      * @returns {Promise}
      */
     async setStation(station) {
-        return this.setDocument('stations', station.id, station);
+        if (this.isInitialised()) {
+            return this.setDocument('stations', station.id, station);
+        } else {
+            return utils.emptyPromise();
+        }
     }
 }

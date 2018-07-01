@@ -5,13 +5,10 @@ module.exports = class Database {
 
     constructor() {
         this.database = null;
-        this.brandsData = null;
-        this.fueltypesData = null;
-        this.stationsData = null;
     }
 
     isInitialised() {
-        return !!this.database && !!this.brandsData && !!this.fueltypesData && !!this.stationsData;
+        return !!this.database;
     }
 
     async init(firebaseCredentials) {
@@ -28,6 +25,20 @@ module.exports = class Database {
         };
     }
 
+    async setDocument(collection, documentID, document) {
+        if (this.isInitialised()) {
+            return this.database.ref(collection).child(documentID).set(document);
+        } else {
+            return utils.emptyPromise();
+        }
+    }
 
+    async unsetDocument(collection, documentID) {
+        if (this.isInitialised()) {
+            return this.database.ref(collection).child(documentID).set(null);
+        } else {
+            return utils.emptyPromise();
+        }
+    }
 
 };
