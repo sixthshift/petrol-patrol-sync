@@ -16,12 +16,22 @@ module.exports = class FuelCheck {
         this.stationsData = null;
     }
 
-    // (key:string, secret:string) => (string)
+    /**
+     * Generates a base64 encode of a key, secret pair
+     * 
+     * @param {string} key 
+     * @param {string} secret 
+     * @returns {string}
+     */
     static encode(key, secret) {
-        return 'Basic ' + Buffer.from(key + ':' + secret).toString('base64');
+        return Buffer.from(key + ':' + secret).toString('base64');
     }
 
-    // () => (boolean)
+    /**
+     * Determines whether initialisation is successful or not
+     * 
+     * @returns {boolean}
+     */
     isInitialised() {
         return (
             !!this.apikey
@@ -34,13 +44,24 @@ module.exports = class FuelCheck {
         );
     }
 
+    /**
+     * Determines whether a given timestamp is older than {constants.staleThreshold} days ago
+     * 
+     * @param {string} thenTime 
+     * @returns {boolean}
+     */
     static isStale(thenTime) {
         const then = time.parseTimestamp(thenTime);
         const now = time.now();
         return time.diff(then, now) >= constants.staleThreshold;
     }
 
-    // (key:string, secret: string) => (object)
+    /**
+     * Initialises self with the given credentials
+     * 
+     * @param {object} fuelcheckCredentials
+     * @returns {object} The response status of the method
+     */
     async init(fuelcheckCredentials) {
         this.apikey = fuelcheckCredentials.key;
         this.credentials = FuelCheck.encode(fuelcheckCredentials.key, fuelcheckCredentials.secret);
@@ -63,7 +84,12 @@ module.exports = class FuelCheck {
         };
     }
 
-    // (credentials:string) => (object)
+    /**
+     * Fetches the access token required for FuelCheck request authentication
+     * 
+     * @param {object} credentials 
+     * @returns {object} The response status of the method
+     */
     async checkOrFetchAccessToken(credentials) {
         const config = {
             method: 'get',
@@ -72,7 +98,7 @@ module.exports = class FuelCheck {
                 'grant_type': 'client_credentials'
             },
             headers: {
-                'Authorization': credentials
+                'Authorization': 'Basic ' + credentials
             }
         };
         return await axios(config)
@@ -101,7 +127,13 @@ module.exports = class FuelCheck {
             });
     }
 
-    // (apikey:string, accessToken: string) => (object)
+    /**
+     * Fetches reference data from the FuelCheck API
+     * 
+     * @param {string} apikey 
+     * @param {string} accessToken 
+     * @returns {object} The response status of the method
+     */
     async fetchReferenceData(apikey, accessToken) {
         const config = {
             method: 'get',
@@ -174,7 +206,13 @@ module.exports = class FuelCheck {
             });
     }
 
-    // (apikey:string, accessToken: string) => (object)
+    /**
+     * Fetches price data from the FuelCheck API
+     * 
+     * @param {string} apikey 
+     * @param {string} accessToken 
+     * @returns {object} The response status of the method
+     */
     async fetchPricesData(apikey, accessToken) {
         const config = {
             method: 'get',
@@ -223,7 +261,11 @@ module.exports = class FuelCheck {
             });
     }
 
-    // () => (object)
+    /**
+     * Returns a list of brands from the FuelCheck API
+     * 
+     * @returns {[object]} A list of brands
+     */
     brands() {
         if (this.isInitialised()) {
             return this.brandsData;
@@ -232,7 +274,11 @@ module.exports = class FuelCheck {
         }
     }
 
-    // () => (object)
+    /**
+     * Returns a list of fueltypes from the FuelCheck API
+     * 
+     * @returns {[object]} A list of fueltypes
+     */
     fueltypes() {
         if (this.isInitialised()) {
             return this.fueltypesData;
@@ -241,7 +287,11 @@ module.exports = class FuelCheck {
         }
     }
 
-    // () => (object)
+    /**
+     * Returns a list of prices from the FuelCheck API
+     * 
+     * @returns {[object]} A list of prices
+     */
     prices() {
         if (this.isInitialised()) {
             return this.pricesData;
@@ -250,7 +300,11 @@ module.exports = class FuelCheck {
         }
     }
 
-    // () => (object)
+    /**
+     * Returns a list of stations from the FuelCheck API
+     * 
+     * @returns {[object]} A list of stations
+     */
     stations() {
         if (this.isInitialised()) {
             return this.stationsData;

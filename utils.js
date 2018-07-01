@@ -3,6 +3,9 @@ const crypto = require('crypto');
 
 module.exports = {
 
+    /**
+     * 
+     */
     deactivate: (object) => {
         return _.update(object, 'active', () => { return false });
     },

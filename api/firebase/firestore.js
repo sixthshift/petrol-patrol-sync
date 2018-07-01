@@ -68,9 +68,6 @@ module.exports = class FireStore {
     async setDocument(collection, documentID, document) {
         if (this.isInitialised()) {
             const sanitisedID = utils.sanitiseID(documentID);
-            if (sanitisedID == 17260) {
-                console.log(collection + ' ' + sanitisedID + ' ' + JSON.stringify(document));
-            }
             return this.firestore.collection(collection).doc(sanitisedID).set(document);
         } else {
             return [];
