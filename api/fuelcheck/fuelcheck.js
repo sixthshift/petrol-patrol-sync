@@ -169,18 +169,17 @@ module.exports = class FuelCheck {
                 this.fueltypesData = response.data.fueltypes.items.map(rebuildFueltypeData);
 
                 const rebuildStationData = (station) => {
-                    return {
+                    return _.merge({
                         id: station.code,
                         name: station.name,
                         brand: station.brand,
                         active: true,
-                        location: _.merge(
-                            {
-                                latitude: station.location.latitude,
-                                longitude: station.location.longitude
-                            }, utils.splitAddress(station.address)
-                        )
-                    };
+                        l: {
+                            0: station.location.latitude,
+                            1: station.location.longitude,
+                        },
+                        g: utils.geoEncode(station.location.latitude, station.location.longitude),
+                    }, utils.splitAddress(station.address));
                 };
                 this.stationsData = response.data.stations.items.map(rebuildStationData);
                 return {

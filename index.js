@@ -153,19 +153,18 @@ main = async () => {
     const initialisationResults = await Promise.all(initialisationPromises);
     const initialisationErrors = _.filter(initialisationResults, isError);
     if (!_.isEmpty(initialisationErrors)) {
-        console.log('test');
         console.error(initialisationErrors);
     }
 
-    // const syncPromises = [];
+    const syncPromises = [];
 
-    // syncPromises.push(syncBrands(fuelcheck, mongodb));
-    // syncPromises.push(syncFueltypes(fuelcheck, mongodb));
-    // syncPromises.push(syncStations(fuelcheck, mongodb));
-    // syncPromises.push(syncPrices(fuelcheck, mongodb));
+    syncPromises.push(syncBrands(fuelcheck, mongodb));
+    syncPromises.push(syncFueltypes(fuelcheck, mongodb));
+    syncPromises.push(syncStations(fuelcheck, mongodb));
+    syncPromises.push(syncPrices(fuelcheck, mongodb));
 
-    // const syncResults = await Promise.all(syncPromises);
-    // console.log(JSON.stringify(syncResults));
+    const syncResults = await Promise.all(syncPromises);
+    console.log(JSON.stringify(syncResults));
 
 };
 
