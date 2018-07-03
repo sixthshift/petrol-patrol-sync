@@ -32,7 +32,7 @@ isError = (result) => {
     }
 };
 
-syncBrands = async (fuelcheck, database) => {
+syncBrands = async (fuelcheck, database, firedb) => {
 
     const databaseBrands = database.brands();
     const fuelcheckBrands = fuelcheck.brands();
@@ -42,12 +42,14 @@ syncBrands = async (fuelcheck, database) => {
         .map(utils.deactivate);
 
     let promises = [];
-    _.each(toBeDisabled, (deactivated) => {
-        promises.push(database.setBrand(deactivated));
+    _.each(toBeDisabled, (disabled) => {
+        promises.push(database.setBrand(disabled));
+        promises.push(firedb.setBrand(disabled));
     });
 
-    _.each(toBeEnabled, (activated) => {
-        promises.push(database.setBrand(activated));
+    _.each(toBeEnabled, (enabled) => {
+        promises.push(database.setBrand(enabled));
+        promises.push(firedb.setBrand(enabled));
     });
 
     await Promise.all(promises);
@@ -58,7 +60,7 @@ syncBrands = async (fuelcheck, database) => {
     };
 };
 
-syncFueltypes = async (fuelcheck, database) => {
+syncFueltypes = async (fuelcheck, database, firedb) => {
 
     const databaseFueltypes = database.fueltypes();
     const fuelcheckFueltypes = fuelcheck.fueltypes();
@@ -68,12 +70,14 @@ syncFueltypes = async (fuelcheck, database) => {
         .map(utils.deactivate);
 
     let promises = [];
-    _.each(toBeDisabled, (deactivated) => {
-        promises.push(database.setFueltype(deactivated));
+    _.each(toBeDisabled, (disabled) => {
+        promises.push(database.setFueltype(disabled));
+        promises.push(firedb.setFueltype(disabled));
     });
 
-    _.each(toBeEnabled, (activated) => {
-        promises.push(database.setFueltype(activated));
+    _.each(toBeEnabled, (enabled) => {
+        promises.push(database.setFueltype(enabled));
+        promises.push(firedb.setFueltype(enabled));
     });
 
     await Promise.all(promises);
@@ -84,7 +88,7 @@ syncFueltypes = async (fuelcheck, database) => {
     };
 };
 
-syncStations = async (fuelcheck, database) => {
+syncStations = async (fuelcheck, database, firedb) => {
 
     const databaseStations = database.stations();
     const fuelcheckStations = fuelcheck.stations();
@@ -94,12 +98,14 @@ syncStations = async (fuelcheck, database) => {
         .map(utils.deactivate);
 
     let promises = [];
-    _.each(toBeDisabled, (deactivated) => {
-        promises.push(database.setStation(deactivated));
+    _.each(toBeDisabled, (disabled) => {
+        promises.push(database.setStation(disabled));
+        promises.push(firedb.setStation(disabled));
     });
 
-    _.each(toBeEnabled, (activated) => {
-        promises.push(database.setStation(activated));
+    _.each(toBeEnabled, (enabled) => {
+        promises.push(database.setStation(enabled));
+        promises.push(firedb.setStation(enabled));
     });
 
     await Promise.all(promises);
@@ -110,7 +116,7 @@ syncStations = async (fuelcheck, database) => {
     };
 };
 
-syncPrices = async (fuelcheck, database) => {
+syncPrices = async (fuelcheck, database, firedb) => {
 
     const databasePrices = database.prices();
     const fuelcheckPrices = fuelcheck.prices();
@@ -121,12 +127,14 @@ syncPrices = async (fuelcheck, database) => {
 
     let promises = [];
 
-    _.each(toBeUpdated, (price) => {
-        promises.push(database.setPrice(price));
+    _.each(toBeUpdated, (updated) => {
+        promises.push(database.setPrice(updated));
+        promises.push(firedb.setPrice(updated));
     });
 
-    _.each(toBeExpired, (price) => {
-        promises.push(database.unsetPrice(price));
+    _.each(toBeExpired, (expired) => {
+        promises.push(database.unsetPrice(expired));
+        promises.push(firedb.unsetPrice(expired));
     });
 
     await Promise.all(promises);
@@ -158,14 +166,13 @@ main = async () => {
 
     const syncPromises = [];
 
-    syncPromises.push(syncBrands(fuelcheck, mongodb));
-    syncPromises.push(syncFueltypes(fuelcheck, mongodb));
-    syncPromises.push(syncStations(fuelcheck, mongodb));
-    syncPromises.push(syncPrices(fuelcheck, mongodb));
+    syncPromises.push(syncBrands(fuelcheck, mongodb, firedb));
+    syncPromises.push(syncFueltypes(fuelcheck, mongodb, firedb));
+    syncPromises.push(syncStations(fuelcheck, mongodb, firedb));
+    syncPromises.push(syncPrices(fuelcheck, mongodb, firedb));
 
     const syncResults = await Promise.all(syncPromises);
     console.log(JSON.stringify(syncResults, null, 2));
-
 };
 
 main().then(() => {

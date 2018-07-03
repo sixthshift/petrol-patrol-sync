@@ -203,7 +203,11 @@ module.exports = class MongoDB {
      * @returns {Promise}
      */
     async setFueltype(fueltype) {
-        return this.setDocument('fueltypes', fueltype.code, fueltype);
+        if (this.isInitialised()) {
+            return this.setDocument('fueltypes', fueltype.code, fueltype);
+        } else {
+            return utils.emptyPromise();
+        }
     }
 
     /**
@@ -237,7 +241,7 @@ module.exports = class MongoDB {
     /**
      * Deletes a price object from MongoDB
      * 
-     * @param {*} price The price object to delete
+     * @param {object} price The price object to delete
      * @returns {Promise}
      */
     async unsetPrice(price) {
