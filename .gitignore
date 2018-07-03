@@ -1,5 +1,2 @@
 /node_modules
 /api/mongodb/data
-firebase-credentials.json
-fuelcheck-credentials.json
-mongodb-credentials.json
