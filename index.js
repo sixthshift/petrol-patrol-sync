@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const constants = require('./constants');
 const time = require('./util/time');
-const utils = require('./utils');
+const utils = require('./util/utils');
 
 const FireDB = require('./api/firebase/firedb');
 const FuelCheck = require('./api/fuelcheck/fuelcheck');
@@ -13,24 +13,6 @@ const MongoDB = require('./api/mongodb/mongodb');
 const firebaseCredentials = require('./api/firebase/firebase-credentials');
 const fuelcheckCredentials = require('./api/fuelcheck/fuelcheck-credentials');
 const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
-
-isExpired = (price) => {
-    const then = time.parseUnix(price.time);
-    const now = time.now();
-    return time.diff(then, now) >= constants.expiredThreshold;
-}
-
-agePrice = (price) => {
-    return _.set(price, 'stale', isStale(price));
-};
-
-isError = (result) => {
-    try {
-        return result.status == false;
-    } catch (error) {
-        return true;
-    }
-};
 
 syncBrands = async (fuelcheck, database, firedb) => {
 
@@ -123,7 +105,7 @@ syncPrices = async (fuelcheck, database, firedb) => {
 
     let toBeUpdated = utils.difference(fuelcheckPrices, databasePrices);
     let toBePreserved = utils.difference(databasePrices, toBeUpdated);
-    let toBeExpired = _.union(toBeUpdated, toBePreserved).filter(isExpired);
+    let toBeExpired = _.union(toBeUpdated, toBePreserved).filter(utils.isExpired);
 
     let promises = [];
 
@@ -159,7 +141,7 @@ main = async () => {
     initialisationPromises.push(firedb.init(firebaseCredentials));
 
     const initialisationResults = await Promise.all(initialisationPromises);
-    const initialisationErrors = _.filter(initialisationResults, isError);
+    const initialisationErrors = _.filter(initialisationResults, utils.isError);
     if (!_.isEmpty(initialisationErrors)) {
         console.error(initialisationErrors);
     }

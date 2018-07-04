@@ -1,6 +1,7 @@
-const MongoClient = require('mongodb').MongoClient;
 const _ = require('lodash');
-const utils = require('../../utils');
+const MongoClient = require('mongodb').MongoClient;
+const mongoUtils = require('./utils');
+const utils = require('../../util/utils');
 
 module.exports = class MongoDB {
 
@@ -10,52 +11,6 @@ module.exports = class MongoDB {
         this.fueltypesData = null;
         this.stationsData = null;
         this.pricesData = null;
-    }
-
-    /**
-     * Constructs a MongoDB URI based on credential configurations
-     * 
-     * @param {object} credentials 
-     * @returns {string} The MongoDB URI
-     */
-    static buildUri(credentials) {
-        return 'mongodb://' + credentials.username + ':' + credentials.password + '@' + credentials.url + '/' + credentials.db;
-    }
-
-    /**
-     * Determines whether a given object is active or not,
-     * if the 'active' property does not exist then it is assumed active
-     * 
-     * @param {object} object
-     * @returns {boolean}
-     */
-    static isActive(object) {
-        if (_.has(object, 'active')) {
-            return object.active === true;
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Omits the MongoDB internal id property from an object
-     * 
-     * @param {object} object 
-     * @returns {object} The object with the MongoDB internal id omitted
-     */
-    static omitInternalID(object) {
-        return _.omit(object, '_id');
-    }
-
-    /**
-     * Assigns the MongoDB internal id property to an object
-     * 
-     * @param {string} documentID 
-     * @param {object} document 
-     * @returns {object} The object with the MongoDB internal id assigned
-     */
-    static assignInternalID(documentID, document) {
-        return _.assign(document, { _id: documentID });
     }
 
     /**
@@ -74,7 +29,7 @@ module.exports = class MongoDB {
      * @returns {object} The response status of the method
      */
     async init(mongoCredentials) {
-        const uri = MongoDB.buildUri(mongoCredentials);
+        const uri = mongoUtils.buildUri(mongoCredentials);
         try {
             const mongoClient = await MongoClient.connect(uri);
             this.mongodb = mongoClient.db(mongoCredentials.db);
@@ -116,8 +71,8 @@ module.exports = class MongoDB {
             const snapshot = await this.mongodb.collection(collection).find();
             const documents = await snapshot.toArray();
 
-            const activeDocuments = _.filter(documents, MongoDB.isActive);
-            const normalisedDocuments = _.map(activeDocuments, MongoDB.omitInternalID);
+            const activeDocuments = _.filter(documents, utils.isActive);
+            const normalisedDocuments = _.map(activeDocuments, mongoUtils.omitInternalID);
             return normalisedDocuments;
         } else {
             return [];
@@ -134,7 +89,7 @@ module.exports = class MongoDB {
      */
     async setDocument(collection, documentID, document) {
         if (this.isInitialised()) {
-            document = MongoDB.assignInternalID(documentID, document);
+            document = mongoUtils.assignInternalID(documentID, document);
             return this.mongodb.collection(collection).replaceOne({ _id: documentID }, document, { upsert: true });
         } else {
             return utils.emptyPromise();

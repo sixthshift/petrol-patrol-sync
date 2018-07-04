@@ -1,8 +1,9 @@
+const _ = require('lodash');
 const axios = require('axios');
 const constants = require('../../constants');
-const utils = require('../../utils');
+const fuelcheckUtils = require('./utils');
 const time = require('../../util/time');
-const _ = require('lodash');
+const utils = require('../../util/utils');
 
 module.exports = class FuelCheck {
 
@@ -14,17 +15,6 @@ module.exports = class FuelCheck {
         this.fueltypesData = null;
         this.pricesData = null;
         this.stationsData = null;
-    }
-
-    /**
-     * Generates a base64 encode of a key, secret pair
-     * 
-     * @param {string} key 
-     * @param {string} secret 
-     * @returns {string}
-     */
-    static encode(key, secret) {
-        return Buffer.from(key + ':' + secret).toString('base64');
     }
 
     /**
@@ -45,30 +35,6 @@ module.exports = class FuelCheck {
     }
 
     /**
-     * Determines whether a given timestamp is older than {constants.staleThreshold} days ago
-     * 
-     * @param {string} thenTime 
-     * @returns {boolean}
-     */
-    static isStale(thenTime) {
-        const then = time.parseTimestamp(thenTime);
-        const now = time.now();
-        return time.diff(then, now) >= constants.staleThreshold;
-    }
-
-    /**
-     * Determines whether a given price is older than {constants.expiredThreshold} days ago
-     * 
-     * @param {string} thenTime 
-     * @returns {boolean}
-     */
-    isExpired(price) {
-        const then = time.parseUnix(price.time);
-        const now = time.now();
-        return time.diff(then, now) >= constants.expiredThreshold;
-    }
-
-    /**
      * Initialises self with the given credentials
      * 
      * @param {object} fuelcheckCredentials
@@ -76,7 +42,7 @@ module.exports = class FuelCheck {
      */
     async init(fuelcheckCredentials) {
         this.apikey = fuelcheckCredentials.key;
-        this.credentials = FuelCheck.encode(fuelcheckCredentials.key, fuelcheckCredentials.secret);
+        this.credentials = fuelcheckUtils.encodeBase64(fuelcheckCredentials.key, fuelcheckCredentials.secret);
         let response = await this.checkOrFetchAccessToken(this.credentials);
         if (!response.status) {
             return response;
@@ -190,8 +156,8 @@ module.exports = class FuelCheck {
                             0: station.location.latitude,
                             1: station.location.longitude,
                         },
-                        g: utils.geoEncode(station.location.latitude, station.location.longitude),
-                    }, utils.splitAddress(station.address));
+                        g: fuelcheckUtils.encodeGeohash(station.location.latitude, station.location.longitude),
+                    }, fuelcheckUtils.splitAddress(station.address));
                 };
                 this.stationsData = response.data.stations.items.map(rebuildStationData);
                 return {
@@ -244,11 +210,11 @@ module.exports = class FuelCheck {
                         fueltype: price.fueltype,
                         price: price.price,
                         time: time.parseTimestamp(price.lastupdated).unix(),
-                        stale: FuelCheck.isStale(price.lastupdated),
+                        stale: utils.isStale(price),
                     };
                 };
                 const rebuiltPrices = _.map(response.data.prices, rebuildPrice);
-                const activePrices = _.reject(rebuiltPrices, isExpired);
+                const activePrices = _.reject(rebuiltPrices, utils.isExpired);
                 this.pricesData = activePrices;
                 return {
                     status: true,
@@ -268,7 +234,7 @@ module.exports = class FuelCheck {
                     return {
                         status: false,
                         responseCode: 'ConnectionError',
-                        response: 'Cannot connect to Fuelcheck'
+                        response: 'Cannot connect to Fuelcheck',
                     };
                 }
             });

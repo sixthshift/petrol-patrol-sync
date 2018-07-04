@@ -1,5 +1,5 @@
 const admin = require('firebase-admin');
-const utils = require('../../utils');
+const utils = require('../../util/utils');
 
 module.exports = class FireStore {
 
