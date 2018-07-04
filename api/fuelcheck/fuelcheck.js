@@ -57,8 +57,7 @@ module.exports = class FuelCheck {
         }
         return {
             status: true,
-            responseCode: 'success',
-            response: 'Initialisation successful'
+            response: 'Initialisation successful',
         };
     }
 
@@ -73,35 +72,24 @@ module.exports = class FuelCheck {
             method: 'get',
             url: 'https://api.onegov.nsw.gov.au/oauth/client_credential/accesstoken',
             params: {
-                'grant_type': 'client_credentials'
+                'grant_type': 'client_credentials',
             },
             headers: {
-                'Authorization': 'Basic ' + credentials
-            }
+                'Authorization': 'Basic ' + credentials,
+            },
         };
         return await axios(config)
             .then((response) => {
                 this.accessToken = 'Bearer ' + response.data.access_token;
                 return {
                     status: true,
-                    responseCode: 'success',
-                    response: 'Access token successfully generated'
+                    response: 'Access token successfully generated',
                 };
             }).catch((error) => {
-                try {
-                    return {
-                        status: false,
-                        responseCode: error.response.data.ErrorCode,
-                        response: error.response.data.Error
-                    };
-                } catch (error) {
-                    // Error when generating error
-                    return {
-                        status: false,
-                        responseCode: 'ConnectionError',
-                        response: 'Cannot connect to Fuelcheck'
-                    };
-                }
+                return {
+                    status: false,
+                    response: error,
+                };
             });
     }
 
@@ -122,8 +110,8 @@ module.exports = class FuelCheck {
                 'Content-Type': 'application/json; charset=utf-8',
                 'if-modified-since': time.epoch().format(time.formatString),
                 'requesttimestamp': time.now().format(time.formatString),
-                'transactionid': '1'
-            }
+                'transactionid': '1',
+            },
         };
         return await axios(config)
             .then((response) => {
@@ -131,7 +119,7 @@ module.exports = class FuelCheck {
                     return {
                         name: brand.name,
                         active: true,
-                        order: index
+                        order: index,
                     };
                 };
                 this.brandsData = response.data.brands.items.map(rebuildBrand);
@@ -162,24 +150,13 @@ module.exports = class FuelCheck {
                 this.stationsData = response.data.stations.items.map(rebuildStationData);
                 return {
                     status: true,
-                    responseCode: 'success',
                     response: 'Reference data successfully fetched'
                 };
             }).catch((error) => {
-                try {
-                    return {
-                        status: false,
-                        responseCode: error.response.data.errorDetails.code,
-                        response: error.response.data.errorDetails.message
-                    };
-                } catch (error) {
-                    // Error when generating error
-                    return {
-                        status: false,
-                        responseCode: 'ConnectionError',
-                        response: 'Cannot connect to Fuelcheck'
-                    };
-                }
+                return {
+                    status: false,
+                    response: error,
+                };
             });
     }
 
@@ -199,8 +176,8 @@ module.exports = class FuelCheck {
                 'Authorization': accessToken,
                 'Content-Type': 'application/json; charset=utf-8',
                 'requesttimestamp': time.now().format(time.formatString),
-                'transactionid': '1'
-            }
+                'transactionid': '1',
+            },
         };
         return await axios(config)
             .then((response) => {
@@ -218,25 +195,14 @@ module.exports = class FuelCheck {
                 this.pricesData = activePrices;
                 return {
                     status: true,
-                    responseCode: 'success',
-                    response: 'Prices data successfully fetched'
+                    response: 'Prices data successfully fetched',
                 };
             })
             .catch((error) => {
-                try {
-                    return {
-                        status: false,
-                        responseCode: error.response.data.errorDetails.code,
-                        response: error.response.data.errorDetails.message,
-                    };
-                } catch (error) {
-                    // Error when generating error
-                    return {
-                        status: false,
-                        responseCode: 'ConnectionError',
-                        response: 'Cannot connect to Fuelcheck',
-                    };
-                }
+                return {
+                    status: false,
+                    response: error,
+                };
             });
     }
 

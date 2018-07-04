@@ -17,7 +17,7 @@ module.exports = class FireStore {
 
     async init(firebaseCredentials) {
         admin.initializeApp({
-            credential: admin.credential.cert(firebaseCredentials)
+            credential: admin.credential.cert(firebaseCredentials),
         });
         this.firestore = admin.firestore();
         try {
@@ -29,19 +29,17 @@ module.exports = class FireStore {
                 [
                     this.fetchCollection('brands'),
                     this.fetchCollection('fueltypes'),
-                    this.fetchCollection('stations')
+                    this.fetchCollection('stations'),
                 ]
             );
             return {
                 status: true,
-                responseCode: 'success',
-                response: 'Initialisation Successful'
+                response: 'Initialisation Successful',
             };
         } catch (error) {
             return {
                 status: false,
-                responseCode: error.code,
-                response: error.details
+                response: error,
             };
         }
     }

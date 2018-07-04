@@ -21,14 +21,13 @@ module.exports = class Database {
     async init(firebaseCredentials) {
         admin.initializeApp({
             credential: admin.credential.cert(firebaseCredentials),
-            databaseURL: "https://petrol-patrol.firebaseio.com"
+            databaseURL: "https://petrol-patrol.firebaseio.com",
         });
         this.database = admin.database();
 
         return {
             status: true,
-            responseCode: 'success',
-            response: 'Initialisation successful'
+            response: 'Initialisation successful',
         };
     }
 

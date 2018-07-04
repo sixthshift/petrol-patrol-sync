@@ -48,14 +48,12 @@ module.exports = class MongoDB {
             );
             return {
                 status: true,
-                responseCode: 'success',
-                response: 'Initialisation successful'
+                response: 'Initialisation successful',
             };
         } catch (error) {
             return {
                 status: false,
-                responseCode: error.name,
-                response: error.message
+                response: error,
             };
         }
     }
