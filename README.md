@@ -15,6 +15,12 @@ The corresponding credentials need to be inserted into the code at the following
  - /api/mongodb/mongodb-credentials.json
  - /api/firebase/firebase-credentials.json
 
+To execute the sync script:
+
+```
+node index.js
+```
+
 ## Deployment
 As this is intended to be run as a scheduled job, the ideal deployment location would be a 3rd party server such as Heroku.
 
@@ -33,6 +39,7 @@ A --> C((MongoDB))
 C --> A
 A -- Mirror MongoDB --> D((Firebase Database))
 ```
+
 ### Rationale
 The rationale for this relatively complicated design is purely based on minimising costs to access these services.
 
