@@ -122,4 +122,4 @@ module.exports = {
     isExpired,
     isStale,
     sanitiseID,
-}
+};

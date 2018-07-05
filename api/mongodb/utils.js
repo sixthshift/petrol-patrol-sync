@@ -9,7 +9,7 @@ const _ = require('lodash');
  */
 const assignInternalID = (documentID, document) => {
     return _.assign({}, document, { _id: documentID });
-}
+};
 
 /**
  * Constructs a MongoDB URI based on credential configurations
@@ -19,7 +19,7 @@ const assignInternalID = (documentID, document) => {
  */
 const buildUri = (credentials) => {
     return 'mongodb://' + credentials.username + ':' + credentials.password + '@' + credentials.url + '/' + credentials.db;
-}
+};
 
 /**
  * Omits the MongoDB internal id property from an object
@@ -35,4 +35,4 @@ module.exports = {
     assignInternalID,
     buildUri,
     omitInternalID,
-}
+};

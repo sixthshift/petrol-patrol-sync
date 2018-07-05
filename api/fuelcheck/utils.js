@@ -11,7 +11,7 @@ const time = require('../../util/time');
  */
 const encodeBase64 = (key, secret) => {
     return Buffer.from(key + ':' + secret).toString('base64');
-}
+};
 
 /**
  * Encodes a latitude and longitude tuple into a geohash
@@ -80,4 +80,4 @@ module.exports = {
     encodeBase64,
     encodeGeohash,
     splitAddress,
-}
+};
