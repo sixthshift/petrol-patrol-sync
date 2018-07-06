@@ -2,6 +2,7 @@ const _ = require('lodash');
 const axios = require('axios');
 const constants = require('../../constants');
 const fuelcheckUtils = require('./utils');
+const log = require('../../util/log');
 const time = require('../../util/time');
 const utils = require('../../util/utils');
 
@@ -41,6 +42,8 @@ module.exports = class FuelCheck {
      * @returns {object} The response status of the method
      */
     async init(fuelcheckCredentials) {
+        log.info('Initialising Fuelcheck');
+
         this.apikey = fuelcheckCredentials.key;
         this.credentials = fuelcheckUtils.encodeBase64(fuelcheckCredentials.key, fuelcheckCredentials.secret);
         let response = await this.checkOrFetchAccessToken(this.credentials);
@@ -55,6 +58,8 @@ module.exports = class FuelCheck {
         if (!response.status) {
             return response;
         }
+
+        log.info('Initialised Fuelcheck');
         return {
             status: true,
             response: 'Initialisation successful',

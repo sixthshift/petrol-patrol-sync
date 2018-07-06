@@ -1,4 +1,5 @@
 const admin = require('firebase-admin');
+const log = require('../../util/log');
 const utils = require('../../util/utils');
 
 module.exports = class FireStore {
@@ -16,6 +17,8 @@ module.exports = class FireStore {
     }
 
     async init(firebaseCredentials) {
+        log.info('Firestore initialising');
+
         admin.initializeApp({
             credential: admin.credential.cert(firebaseCredentials),
         });
@@ -32,6 +35,8 @@ module.exports = class FireStore {
                     this.fetchCollection('stations'),
                 ]
             );
+
+            log.info('Firestore initialised');
             return {
                 status: true,
                 response: 'Initialisation Successful',

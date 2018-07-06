@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const constants = require('./constants');
+const log = require('./util/log');
 const time = require('./util/time');
 const utils = require('./util/utils');
 
@@ -15,6 +16,7 @@ const fuelcheckCredentials = require('./api/fuelcheck/fuelcheck-credentials');
 const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
 
 syncBrands = async (fuelcheck, database, firedb) => {
+    log.info('Syncing brands');
 
     const databaseBrands = database.brands();
     const fuelcheckBrands = fuelcheck.brands();
@@ -36,13 +38,17 @@ syncBrands = async (fuelcheck, database, firedb) => {
 
     await Promise.all(promises);
 
+
+
     return {
+        collection: 'brands',
         enabled: toBeEnabled,
-        disabled: toBeDisabled
+        disabled: toBeDisabled,
     };
 };
 
 syncFueltypes = async (fuelcheck, database, firedb) => {
+    log.info('Syncing fueltypes');
 
     const databaseFueltypes = database.fueltypes();
     const fuelcheckFueltypes = fuelcheck.fueltypes();
@@ -65,12 +71,14 @@ syncFueltypes = async (fuelcheck, database, firedb) => {
     await Promise.all(promises);
 
     return {
+        collection: 'fueltypes',
         enabled: toBeEnabled,
-        disabled: toBeDisabled
+        disabled: toBeDisabled,
     };
 };
 
 syncStations = async (fuelcheck, database, firedb) => {
+    log.info('Syncing stations');
 
     const databaseStations = database.stations();
     const fuelcheckStations = fuelcheck.stations();
@@ -93,12 +101,14 @@ syncStations = async (fuelcheck, database, firedb) => {
     await Promise.all(promises);
 
     return {
+        collection: 'stations',
         enabled: toBeEnabled,
-        disabled: toBeDisabled
+        disabled: toBeDisabled,
     };
 };
 
 syncPrices = async (fuelcheck, database, firedb) => {
+    log.info('Syncing prices');
 
     const databasePrices = database.prices();
     const fuelcheckPrices = fuelcheck.prices();
@@ -122,12 +132,14 @@ syncPrices = async (fuelcheck, database, firedb) => {
     await Promise.all(promises);
 
     return {
-        toBeUpdated: toBeUpdated,
-        toBeExpired: toBeExpired
+        collection: 'prices',
+        enabled: toBeUpdated,
+        disabled: toBeExpired,
     };
 }
 
 main = async () => {
+    log.info('Begin sync');
 
     let initialisationPromises = [];
 
@@ -142,19 +154,32 @@ main = async () => {
 
     const initialisationResults = await Promise.all(initialisationPromises);
     const initialisationErrors = _.filter(initialisationResults, utils.isError);
+
     if (!_.isEmpty(initialisationErrors)) {
-        console.error(initialisationErrors);
+        _.each(initialisationErrors, (error) => {
+            log.error(error);
+        });
+    } else {
+        const syncPromises = [];
+
+        syncPromises.push(syncBrands(fuelcheck, mongodb, firedb));
+        syncPromises.push(syncFueltypes(fuelcheck, mongodb, firedb));
+        syncPromises.push(syncStations(fuelcheck, mongodb, firedb));
+        syncPromises.push(syncPrices(fuelcheck, mongodb, firedb));
+
+        const syncResults = await Promise.all(syncPromises);
+        _.each(syncResults, (result) => {
+            const numEnabled = _.size(result.enabled);
+            const numDisabled = _.size(result.disabled);
+
+            log.info(numEnabled + ' enabled in ' + result.collection);
+            log.debug(JSON.stringify(result.enabled, null, 2));
+
+            log.info(numDisabled + ' disabled in ' + result.collection);
+            log.debug(JSON.stringify(result.disabled, null, 2));
+        });
     }
-
-    const syncPromises = [];
-
-    syncPromises.push(syncBrands(fuelcheck, mongodb, firedb));
-    syncPromises.push(syncFueltypes(fuelcheck, mongodb, firedb));
-    syncPromises.push(syncStations(fuelcheck, mongodb, firedb));
-    syncPromises.push(syncPrices(fuelcheck, mongodb, firedb));
-
-    const syncResults = await Promise.all(syncPromises);
-    console.log(JSON.stringify(syncResults, null, 2));
+    log.info('End sync');
 };
 
 main().then(() => {

@@ -26,7 +26,7 @@ const log = (logger, level, message) => {
  * @returns {string} The log message that is written
  */
 const info = (message) => {
-    return log(console.info, 'info', message);
+    return log(console.info, 'INFO', message);
 };
 
 /**
@@ -36,7 +36,7 @@ const info = (message) => {
  * @returns {string} The log message that is written
  */
 const warn = (message) => {
-    return log(console.warn, 'warn', message);
+    return log(console.warn, 'WARN', message);
 };
 
 /**
@@ -46,7 +46,7 @@ const warn = (message) => {
  * @returns {string} The log message that is written
  */
 const error = (message) => {
-    return log(console.error, 'error', message);
+    return log(console.error, 'ERROR', message);
 };
 
 /**
@@ -56,7 +56,7 @@ const error = (message) => {
  * @returns {string} The log message that is written
  */
 const debug = (message) => {
-    return log(console.debug, 'debug', message);
+    return log(console.debug, 'DEBUG', message);
 };
 
 /**
@@ -66,7 +66,7 @@ const debug = (message) => {
  * @returns {string} The log message that is written
  */
 const trace = (message) => {
-    return log(console.trace, 'trace', message);
+    return log(console.trace, 'TRACE', message);
 };
 
 module.exports = {

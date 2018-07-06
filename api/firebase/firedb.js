@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const admin = require('firebase-admin');
+const log = require('../../util/log');
 const utils = require('../../util/utils');
 
 module.exports = class Database {
@@ -19,12 +20,15 @@ module.exports = class Database {
      * @returns {object} The response status of the method
      */
     async init(firebaseCredentials) {
+        log.info('Initialising Firebase Database');
+
         admin.initializeApp({
             credential: admin.credential.cert(firebaseCredentials),
             databaseURL: "https://petrol-patrol.firebaseio.com",
         });
         this.database = admin.database();
 
+        log.info('Initialised Firebase Database');
         return {
             status: true,
             response: 'Initialisation successful',

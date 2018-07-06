@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const log = require('../../util/log');
 const MongoClient = require('mongodb').MongoClient;
 const mongoUtils = require('./utils');
 const utils = require('../../util/utils');
@@ -29,6 +30,8 @@ module.exports = class MongoDB {
      * @returns {object} The response status of the method
      */
     async init(mongoCredentials) {
+        log.info('Initialising MongoDB');
+
         const uri = mongoUtils.buildUri(mongoCredentials);
         try {
             const mongoClient = await MongoClient.connect(uri);
@@ -46,6 +49,8 @@ module.exports = class MongoDB {
                     this.fetchCollection('prices')
                 ]
             );
+
+            log.info('Initialised MongoDB');
             return {
                 status: true,
                 response: 'Initialisation successful',
