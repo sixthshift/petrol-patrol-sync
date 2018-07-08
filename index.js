@@ -157,7 +157,7 @@ main = async () => {
 
     if (!_.isEmpty(initialisationErrors)) {
         _.each(initialisationErrors, (error) => {
-            log.error(error);
+            log.error(JSON.stringify(error));
         });
     } else {
         const syncPromises = [];
@@ -173,10 +173,10 @@ main = async () => {
             const numDisabled = _.size(result.disabled);
 
             log.info(numEnabled + ' enabled in ' + result.collection);
-            log.debug(JSON.stringify(result.enabled, null, 2));
+            log.debug(JSON.stringify(result.enabled));
 
             log.info(numDisabled + ' disabled in ' + result.collection);
-            log.debug(JSON.stringify(result.disabled, null, 2));
+            log.debug(JSON.stringify(result.disabled));
         });
     }
     log.info('End sync');
