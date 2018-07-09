@@ -130,7 +130,7 @@ module.exports = class Database {
     async unsetPrice(price) {
         if (this.isInitialised()) {
             const hashID = utils.hash(_.pick(price, ['id', 'fueltype']));
-            return this.unsetDocument('prices', hashID);
+            return this.unsetDocument('pricestest', hashID);
         } else {
             return utils.emptyPromise();
         }
