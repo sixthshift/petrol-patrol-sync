@@ -1,6 +1,5 @@
 {
     "staleThreshold": 30,
     "expiredThreshold": 60,
-    "geohashCharset": "0123456789bcdefghjkmnpqrstuvwxyz",
     "geohashPrecision": 10
 }

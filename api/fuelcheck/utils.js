@@ -21,6 +21,7 @@ const encodeBase64 = (key, secret) => {
  * @returns {string} A geohash value encoding the latitude and longitude values
  */
 const encodeGeohash = (latitude, longitude) => {
+    const charset = "0123456789bcdefghjkmnpqrstuvwxyz";
     let hash = '';
     let bits = 0;
     let numBits = 0;
@@ -49,7 +50,7 @@ const encodeGeohash = (latitude, longitude) => {
             numBits++;
         } else {
             numBits = 0;
-            hash += constants.geohashCharset[bits];
+            hash += charset[bits];
             bits = 0;
         }
     }
