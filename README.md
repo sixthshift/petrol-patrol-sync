@@ -32,13 +32,7 @@ There are three main components to the synchronisation of the FuelCheck data:
  - A MongoDB as an intermediary datastore to perform operations on
  - The Firebase Realtime Database as the final datastore for API calls
 
-```mermaid
-graph LR
-B{FuelCheck API} --> A[Petrol Patrol Sync]
-A --> C((MongoDB))
-C --> A
-A -- Mirror MongoDB --> D((Firebase Database))
-```
+![Architecture of Petrol Patrol Sync](docs/img/architecture.png "Architecture")
 
 ### Rationale
 The rationale for this relatively complicated design is purely based on minimising costs to access these services.
