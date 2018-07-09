@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const time = require('./time');
 
 const logFormatString = 'YYYY-MM-DD HH:mm:ss.SSSS';
 
@@ -6,12 +7,15 @@ const logFormatString = 'YYYY-MM-DD HH:mm:ss.SSSS';
  * Base logging wrapper function over console.log
  * 
  * @param {string} logger The logger object that will write the log message
+ * @param {string} level The log level
  * @param {string} message The log message
  * @returns {string} The log message that is written
  */
-const log = (logger, message) => {
-    logger(message);
-    return message;
+const log = (logger, level, message) => {
+    const logLevel = _.padStart(level, 5, ' ');
+    const log = logLevel + ' - ' + message
+    logger(log);
+    return log;
 };
 
 /**
@@ -21,7 +25,7 @@ const log = (logger, message) => {
  * @returns {string} The log message that is written
  */
 const info = (message) => {
-    return log(console.info, message);
+    return log(console.info, 'INFO', message);
 };
 
 /**
@@ -31,7 +35,7 @@ const info = (message) => {
  * @returns {string} The log message that is written
  */
 const warn = (message) => {
-    return log(console.warn, message);
+    return log(console.warn, 'WARN', message);
 };
 
 /**
@@ -41,7 +45,7 @@ const warn = (message) => {
  * @returns {string} The log message that is written
  */
 const error = (message) => {
-    return log(console.error, message);
+    return log(console.error, 'ERROR', message);
 };
 
 /**
@@ -51,7 +55,7 @@ const error = (message) => {
  * @returns {string} The log message that is written
  */
 const debug = (message) => {
-    return log(console.debug, message);
+    return log(console.debug, 'DEBUG', message);
 };
 
 /**
@@ -61,7 +65,7 @@ const debug = (message) => {
  * @returns {string} The log message that is written
  */
 const trace = (message) => {
-    return log(console.trace, message);
+    return log(console.trace, 'TRACE', message);
 };
 
 module.exports = {
