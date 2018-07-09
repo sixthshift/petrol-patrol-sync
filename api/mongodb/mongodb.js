@@ -30,7 +30,6 @@ module.exports = class MongoDB {
      * @returns {object} The response status of the method
      */
     async init(mongoCredentials) {
-        log.info('Initialising MongoDB');
 
         const uri = mongoUtils.buildUri(mongoCredentials);
         try {
@@ -50,7 +49,6 @@ module.exports = class MongoDB {
                 ]
             );
 
-            log.info('Initialised MongoDB');
             return {
                 status: true,
                 response: 'Initialisation successful',

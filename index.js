@@ -16,7 +16,6 @@ const fuelcheckCredentials = require('./api/fuelcheck/fuelcheck-credentials');
 const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
 
 syncBrands = async (fuelcheck, database, firedb) => {
-    log.info('Syncing brands');
 
     const databaseBrands = database.brands();
     const fuelcheckBrands = fuelcheck.brands();
@@ -48,7 +47,6 @@ syncBrands = async (fuelcheck, database, firedb) => {
 };
 
 syncFueltypes = async (fuelcheck, database, firedb) => {
-    log.info('Syncing fueltypes');
 
     const databaseFueltypes = database.fueltypes();
     const fuelcheckFueltypes = fuelcheck.fueltypes();
@@ -78,7 +76,6 @@ syncFueltypes = async (fuelcheck, database, firedb) => {
 };
 
 syncStations = async (fuelcheck, database, firedb) => {
-    log.info('Syncing stations');
 
     const databaseStations = database.stations();
     const fuelcheckStations = fuelcheck.stations();
@@ -108,7 +105,6 @@ syncStations = async (fuelcheck, database, firedb) => {
 };
 
 syncPrices = async (fuelcheck, database, firedb) => {
-    log.info('Syncing prices');
 
     const databasePrices = database.prices();
     const fuelcheckPrices = fuelcheck.prices();
@@ -174,7 +170,6 @@ main = async () => {
 
             log.info(numEnabled + ' enabled in ' + result.collection);
             log.debug(JSON.stringify(result.enabled));
-
             log.info(numDisabled + ' disabled in ' + result.collection);
             log.debug(JSON.stringify(result.disabled));
         });

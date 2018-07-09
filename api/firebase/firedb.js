@@ -20,7 +20,6 @@ module.exports = class Database {
      * @returns {object} The response status of the method
      */
     async init(firebaseCredentials) {
-        log.info('Initialising Firebase Database');
 
         admin.initializeApp({
             credential: admin.credential.cert(firebaseCredentials),
@@ -28,7 +27,6 @@ module.exports = class Database {
         });
         this.database = admin.database();
 
-        log.info('Initialised Firebase Database');
         return {
             status: true,
             response: 'Initialisation successful',

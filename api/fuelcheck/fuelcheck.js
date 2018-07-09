@@ -42,7 +42,6 @@ module.exports = class FuelCheck {
      * @returns {object} The response status of the method
      */
     async init(fuelcheckCredentials) {
-        log.info('Initialising Fuelcheck');
 
         this.apikey = fuelcheckCredentials.key;
         this.credentials = fuelcheckUtils.encodeBase64(fuelcheckCredentials.key, fuelcheckCredentials.secret);
@@ -59,7 +58,6 @@ module.exports = class FuelCheck {
             return response;
         }
 
-        log.info('Initialised Fuelcheck');
         return {
             status: true,
             response: 'Initialisation successful',
