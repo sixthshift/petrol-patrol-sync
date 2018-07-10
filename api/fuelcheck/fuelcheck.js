@@ -16,6 +16,7 @@ module.exports = class FuelCheck {
         this.fueltypesData = null;
         this.pricesData = null;
         this.stationsData = null;
+        this.averagePricesData = null;
     }
 
     /**
@@ -32,6 +33,7 @@ module.exports = class FuelCheck {
             && !!this.fueltypesData
             && !!this.pricesData
             && !!this.stationsData
+            && !!this.averagePricesData
         );
     }
 
@@ -54,6 +56,10 @@ module.exports = class FuelCheck {
             return response;
         }
         response = await this.fetchPricesData(this.apikey, this.accessToken);
+        if (!response.status) {
+            return response;
+        }
+        response = await this.fetchAveragePricesData();
         if (!response.status) {
             return response;
         }
@@ -87,6 +93,29 @@ module.exports = class FuelCheck {
                 return {
                     status: true,
                     response: 'Access token successfully generated',
+                };
+            }).catch((error) => {
+                return {
+                    status: false,
+                    response: error,
+                };
+            });
+    }
+
+    /**
+     * 
+     */
+    async fetchAveragePricesData() {
+        const config = {
+            method: 'get',
+            url: 'http://api.onegov.nsw.gov.au/FuelCheckApp/v1/fuel/prices/currenttrend',
+        };
+        return await axios(config)
+            .then((response) => {
+                this.averagePricesData = response;
+                return {
+                    status: true,
+                    response: 'Reference data successfully fetched',
                 };
             }).catch((error) => {
                 return {
@@ -153,7 +182,7 @@ module.exports = class FuelCheck {
                 this.stationsData = response.data.stations.items.map(rebuildStationData);
                 return {
                     status: true,
-                    response: 'Reference data successfully fetched'
+                    response: 'Reference data successfully fetched',
                 };
             }).catch((error) => {
                 return {
