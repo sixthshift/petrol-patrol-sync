@@ -103,7 +103,9 @@ module.exports = class FuelCheck {
     }
 
     /**
+     * Fetches average price data from the FuelCheck API
      * 
+     * @returns {object} The response status of the method
      */
     async fetchAveragePricesData() {
         const config = {
