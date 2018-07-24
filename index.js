@@ -5,6 +5,7 @@ const constants = require('./constants');
 const log = require('./util/log');
 const time = require('./util/time');
 const utils = require('./util/utils');
+const circularJSON = require('circular-json');
 
 const FireDB = require('./api/firebase/firedb');
 const FuelCheck = require('./api/fuelcheck/fuelcheck');
@@ -153,7 +154,7 @@ main = async () => {
 
     if (!_.isEmpty(initialisationErrors)) {
         _.each(initialisationErrors, (error) => {
-            log.error(JSON.stringify(error));
+            log.error(circularJSON.stringify(error));
         });
     } else {
         const syncPromises = [];
