@@ -9,9 +9,6 @@ const utils = require('../../util/utils');
 module.exports = class FuelCheck {
 
     constructor() {
-        this.apikey = null;
-        this.credentials = null;
-        this.accessToken = null;
         this.brandsData = null;
         this.fueltypesData = null;
         this.pricesData = null;
@@ -26,14 +23,11 @@ module.exports = class FuelCheck {
      */
     isInitialised() {
         return (
-            !!this.apikey
-            && !!this.credentials
-            && !!this.accessToken
-            && !!this.brandsData
-            && !!this.fueltypesData
-            && !!this.pricesData
-            && !!this.stationsData
-            && !!this.averagePricesData
+            !_.isEmpty(this.brandsData)
+            && !_.isEmpty(this.fueltypesData)
+            && !_.isEmpty(this.pricesData)
+            && !_.isEmpty(this.stationsData)
+            && !_.isEmpty(this.averagePricesData)
         );
     }
 
@@ -45,29 +39,41 @@ module.exports = class FuelCheck {
      */
     async init(fuelcheckCredentials) {
 
-        this.apikey = fuelcheckCredentials.key;
-        this.credentials = fuelcheckUtils.encodeBase64(fuelcheckCredentials.key, fuelcheckCredentials.secret);
-        let response = await this.checkOrFetchAccessToken(this.credentials);
-        if (!response.status) {
-            return response;
-        }
-        response = await this.fetchReferenceData(this.apikey, this.accessToken);
-        if (!response.status) {
-            return response;
-        }
-        response = await this.fetchPricesData(this.apikey, this.accessToken);
-        if (!response.status) {
-            return response;
-        }
-        response = await this.fetchAveragePricesData();
-        if (!response.status) {
-            return response;
-        }
+        try {
+            const apikey = fuelcheckCredentials.key;
+            const accessTokenJSON = fuelcheckUtils.readJSON(constants.accessTokenPath);
+            if (fuelcheckUtils.accessTokenExpired(accessTokenJSON)) {
+                throw new Error('Access token expired');
+            }
+            const accessToken = 'Bearer ' + accessTokenJSON.access_token;
 
-        return {
-            status: true,
-            response: 'Initialisation successful',
-        };
+            let response = await this.fetchReferenceData(apikey, accessToken);
+            if (!response.status) {
+                return response;
+            }
+            response = await this.fetchPricesData(apikey, accessToken);
+            if (!response.status) {
+                return response;
+            }
+            response = await this.fetchAveragePricesData();
+            if (!response.status) {
+                return response;
+            }
+            return {
+                status: true,
+                response: 'Initialisation successful',
+            };
+        } catch (error) {
+            log.warn('Fetching access token');
+            // Not valid access token, fetch new token
+            const credentials = fuelcheckUtils.encodeBase64(fuelcheckCredentials.key, fuelcheckCredentials.secret);
+            let response = await this.checkOrFetchAccessToken(credentials);
+            if (!response.status) {
+                return response;
+            }
+            // Retry initialisation
+            return await this.init(fuelcheckCredentials);
+        }
     }
 
     /**
@@ -89,7 +95,7 @@ module.exports = class FuelCheck {
         };
         return await axios(config)
             .then((response) => {
-                this.accessToken = 'Bearer ' + response.data.access_token;
+                fuelcheckUtils.writeJSON(constants.accessTokenPath, response.data);
                 return {
                     status: true,
                     response: 'Access token successfully generated',

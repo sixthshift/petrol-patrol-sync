@@ -8,10 +8,11 @@ const formatString = 'DD/MM/YYYY hh:mm:ss A';
  * 
  * @param {moment} start A moment object representing the start of the time range
  * @param {moment} end A moment object representing the end of the time range
+ * @param {string} measurement The unit of time measurement to diff by
  * @returns {number} The time difference in days
  */
-const diff = (start, end) => {
-    return end.diff(start, 'days');
+const diff = (start, end, measurement) => {
+    return end.diff(start, measurement);
 };
 
 /**
@@ -43,14 +44,25 @@ const parseTimestamp = (timestamp) => {
 };
 
 /**
- * Parses a integer-based unix time into a moment object representing the same time
+ * Parses a integer-based unix time in milliseconds into a moment object representing the same time
+ * 
+ * @param {*} unixTime Unix time since epoch in milliseconds
+ * @returns {moment} A moment object representing the same time as the unix time
+ */
+const parseUnix = (unixTime) => {
+    return moment(unixTime);
+};
+
+/**
+ * Parses a integer-based unix time in seconds into a moment object representing the same time
  * 
  * @param {string} unixTimeInSeconds Unix time since epoch in seconds
  * @returns {moment} A moment object representing the same time as the unix time
  */
-const parseUnix = (unixTimeInSeconds) => {
-    return moment(unixTimeInSeconds * 1000);
-};
+const parseUnixSeconds = (unixTimeInSeconds) => {
+    return parseUnix(unixTimeInSeconds * 1000);
+}
+
 
 module.exports = {
     diff,
@@ -58,4 +70,5 @@ module.exports = {
     now,
     parseTimestamp,
     parseUnix,
+    parseUnixSeconds,
 }

@@ -83,9 +83,9 @@ const isError = (result) => {
  * @returns {boolean}
  */
 const isExpired = (price) => {
-    const then = time.parseUnix(price.time);
+    const then = time.parseUnixSeconds(price.time);
     const now = time.now();
-    return time.diff(then, now) >= constants.expiredThreshold;
+    return time.diff(then, now, 'days') >= constants.expiredThreshold;
 };
 
 /**
@@ -97,9 +97,9 @@ const isExpired = (price) => {
 const isStale = (price) => {
     const then = (_.has(price, 'lastupdated')) ?
         time.parseTimestamp(price.lastupdated) :
-        time.parseUnix(price.time);
+        time.parseUnixSeconds(price.time);
     const now = time.now();
-    return time.diff(then, now) >= constants.staleThreshold;
+    return time.diff(then, now, 'days') >= constants.staleThreshold;
 };
 
 /**
