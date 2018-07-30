@@ -2,6 +2,8 @@ const _ = require('lodash');
 const axios = require('axios');
 const constants = require('../../constants');
 const fuelcheckUtils = require('./utils');
+const geohash = require('../../util/geohash');
+const jsonfile = require('../../util/jsonfile');
 const log = require('../../util/log');
 const time = require('../../util/time');
 const utils = require('../../util/utils');
@@ -41,7 +43,7 @@ module.exports = class FuelCheck {
 
         try {
             const apikey = fuelcheckCredentials.key;
-            const accessTokenJSON = fuelcheckUtils.readJSON(constants.accessTokenPath);
+            const accessTokenJSON = jsonfile.readJSON(constants.accessTokenPath);
             if (fuelcheckUtils.accessTokenExpired(accessTokenJSON)) {
                 throw new Error('Access token expired');
             }
@@ -95,7 +97,7 @@ module.exports = class FuelCheck {
         };
         return await axios(config)
             .then((response) => {
-                fuelcheckUtils.writeJSON(constants.accessTokenPath, response.data);
+                jsonfile.writeJSON(constants.accessTokenPath, response.data);
                 return {
                     status: true,
                     response: 'Access token successfully generated',
@@ -184,7 +186,7 @@ module.exports = class FuelCheck {
                             0: station.location.latitude,
                             1: station.location.longitude,
                         },
-                        g: fuelcheckUtils.encodeGeohash(station.location.latitude, station.location.longitude),
+                        g: geohash.encode(station.location.latitude, station.location.longitude),
                     }, fuelcheckUtils.splitAddress(station.address));
                 };
                 this.stationsData = response.data.stations.items.map(rebuildStationData);
