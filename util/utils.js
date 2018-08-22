@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const constants = require('../constants');
-const crypto = require('crypto');
+const objectHash = require('object-hash');
 const time = require('./time');
 
 /**
@@ -35,16 +35,13 @@ const emptyPromise = (val = null) => {
 };
 
 /**
- * Generates an md5 hash from the input
+ * Generates an SHA1 hash from the input
  * 
  * @param {object} data The data to be hashed
  * @returns {string} The hash value of the input
  */
 const hash = (data) => {
-    const dataString = JSON.stringify(data);
-    let md5sum = crypto.createHash('md5');
-    md5sum.update(dataString);
-    return md5sum.digest('hex');
+    return objectHash(data);
 };
 
 /**
