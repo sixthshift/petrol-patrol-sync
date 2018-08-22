@@ -24,6 +24,17 @@ const difference = (toInspect, toExclude) => {
     return _.differenceWith(toInspect, toExclude, _.isEqual);
 };
 
+
+/**
+ * Determines the intersection of objects between the inputted arrays
+ * 
+ * @param  {...[object]} arrays The arrays that are to be intersected
+ * @returns {[object]} An array containing only the objects that are common to all the input arrays
+ */
+const intersection = (...arrays) => {
+    return _.intersectionWith(...arrays, _.isEqual);
+}
+
 /**
  * Returns an empty promise object
  * 
@@ -37,11 +48,11 @@ const emptyPromise = (val = null) => {
 /**
  * Generates an SHA1 hash from the input
  * 
- * @param {object} data The data to be hashed
+ * @param {any} data The data to be hashed
  * @returns {string} The hash value of the input
  */
 const hash = (data) => {
-    return objectHash(data);
+    return objectHash(data, { unorderedArrays: true });
 };
 
 /**
@@ -114,6 +125,7 @@ module.exports = {
     difference,
     emptyPromise,
     hash,
+    intersection,
     isActive,
     isError,
     isExpired,

@@ -10,6 +10,7 @@ module.exports = class MongoDB {
         this.mongodb = null;
         this.brandsData = null;
         this.fueltypesData = null;
+        this.hashData = null;
         this.stationsData = null;
         this.pricesData = null;
     }
@@ -38,12 +39,14 @@ module.exports = class MongoDB {
             [
                 this.brandsData,
                 this.fueltypesData,
+                this.hashData,
                 this.stationsData,
                 this.pricesData
             ] = await Promise.all(
                 [
                     this.fetchCollection('brands'),
                     this.fetchCollection('fueltypes'),
+                    this.fetchCollection('hash'),
                     this.fetchCollection('stations'),
                     this.fetchCollection('prices')
                 ]
@@ -119,7 +122,7 @@ module.exports = class MongoDB {
      */
     brands() {
         if (this.isInitialised()) {
-            return this.brandsData;
+            return _.sortBy(this.brandsData, 'order');
         } else {
             return [];
         }
@@ -146,7 +149,7 @@ module.exports = class MongoDB {
      */
     fueltypes() {
         if (this.isInitialised()) {
-            return this.fueltypesData;
+            return _.sortBy(this.fueltypesData, 'order');
         } else {
             return [];
         }
@@ -161,6 +164,35 @@ module.exports = class MongoDB {
     async setFueltype(fueltype) {
         if (this.isInitialised()) {
             return this.setDocument('fueltypes', fueltype.code, fueltype);
+        } else {
+            return utils.emptyPromise();
+        }
+    }
+
+    /**
+     * Returns a list of collection hashes from MongoDB
+     * 
+     * @returns {[object]} A list of collection hashes
+     */
+    hash() {
+        if (this.isInitialised()) {
+            return this.hashData;
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * Writes a given hash value associated with the collection to MongoDB
+     * 
+     * @param {string} collection The name of the collection that is hashed
+     * @param {string} hash The hash value to be stored
+     * @returns {Promise}
+     */
+    async setHash(collection, hash) {
+        if (this.isInitialised()) {
+            const document = { hash: hash }; // Wrap the hash string value in a document
+            return this.setDocument('hash', collection, document);
         } else {
             return utils.emptyPromise();
         }

@@ -107,6 +107,22 @@ module.exports = class Database {
     }
 
     /**
+     * Writes a given hash value associated with the collection to MongoDB
+     * 
+     * @param {string} collection The name of the collection that is hashed
+     * @param {string} hash The hash value to be stored
+     * @returns {Promise}
+     */
+    async setHash(collection, hash) {
+        if (this.isInitialised()) {
+            const document = { hash: hash }; // Wrap the hash string value in a document
+            return this.setDocument('hash', collection, document);
+        } else {
+            return utils.emptyPromise();
+        }
+    }
+
+    /**
      * Writes a price object to MongoDB
      * 
      * @param {object} price The price object to write

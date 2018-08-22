@@ -255,7 +255,7 @@ module.exports = class FuelCheck {
      */
     brands() {
         if (this.isInitialised()) {
-            return this.brandsData;
+            return _.sortBy(this.brandsData, 'order');
         } else {
             return [];
         }
@@ -268,7 +268,7 @@ module.exports = class FuelCheck {
      */
     fueltypes() {
         if (this.isInitialised()) {
-            return this.fueltypesData;
+            return _.sortBy(this.fueltypesData, 'order');
         } else {
             return [];
         }

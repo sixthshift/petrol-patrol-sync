@@ -11,7 +11,7 @@ const FireDB = require('./api/firebase/firedb');
 const FuelCheck = require('./api/fuelcheck/fuelcheck');
 const MongoDB = require('./api/mongodb/mongodb');
 
-// Credentials need to be retrieved from the corresponding Api services.
+// Credentials need to be retrieved from the corresponding API services.
 const firebaseCredentials = require('./api/firebase/firebase-credentials');
 const fuelcheckCredentials = require('./api/fuelcheck/fuelcheck-credentials');
 const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
@@ -21,24 +21,34 @@ syncBrands = async (fuelcheck, database, firedb) => {
     const databaseBrands = database.brands();
     const fuelcheckBrands = fuelcheck.brands();
 
-    const toBeEnabled = utils.difference(fuelcheckBrands, databaseBrands);
-    const toBeDisabled = utils.difference(databaseBrands, fuelcheckBrands)
-        .map(utils.deactivate);
+    let toBeEnabled = [];
+    let toBeSame = [];
+    let toBeDisabled = [];
 
-    let promises = [];
-    _.each(toBeDisabled, (disabled) => {
-        promises.push(database.setBrand(disabled));
-        promises.push(firedb.setBrand(disabled));
-    });
+    if (!_.isEqual(databaseBrands, fuelcheckBrands)) {
+        toBeEnabled = utils.difference(fuelcheckBrands, databaseBrands);
+        toBeSame = utils.intersection(fuelcheckBrands, databaseBrands);
+        toBeDisabled = utils.difference(databaseBrands, fuelcheckBrands)
+            .map(utils.deactivate);
 
-    _.each(toBeEnabled, (enabled) => {
-        promises.push(database.setBrand(enabled));
-        promises.push(firedb.setBrand(enabled));
-    });
+        let promises = [];
+        _.each(toBeDisabled, (disabled) => {
+            promises.push(database.setBrand(disabled));
+            promises.push(firedb.setBrand(disabled));
+        });
 
-    await Promise.all(promises);
+        _.each(toBeEnabled, (enabled) => {
+            promises.push(database.setBrand(enabled));
+            promises.push(firedb.setBrand(enabled));
+        });
 
+        const union = _.union(toBeEnabled, toBeDisabled, toBeSame);
+        const hash = utils.hash(union);
+        promises.push(database.setHash('brands', hash));
+        promises.push(firedb.setHash('brands', hash));
 
+        await Promise.all(promises);
+    }
 
     return {
         collection: 'brands',
@@ -52,22 +62,34 @@ syncFueltypes = async (fuelcheck, database, firedb) => {
     const databaseFueltypes = database.fueltypes();
     const fuelcheckFueltypes = fuelcheck.fueltypes();
 
-    const toBeEnabled = utils.difference(fuelcheckFueltypes, databaseFueltypes);
-    const toBeDisabled = utils.difference(databaseFueltypes, fuelcheckFueltypes)
-        .map(utils.deactivate);
+    let toBeEnabled = [];
+    let toBeSame = [];
+    let toBeDisabled = [];
 
-    let promises = [];
-    _.each(toBeDisabled, (disabled) => {
-        promises.push(database.setFueltype(disabled));
-        promises.push(firedb.setFueltype(disabled));
-    });
+    if (!_.isEqual(databaseFueltypes, fuelcheckFueltypes)) {
+        toBeEnabled = utils.difference(fuelcheckFueltypes, databaseFueltypes);
+        toBeSame = utils.intersection(fuelcheckFueltypes, databaseFueltypes);
+        toBeDisabled = utils.difference(databaseFueltypes, fuelcheckFueltypes)
+            .map(utils.deactivate);
 
-    _.each(toBeEnabled, (enabled) => {
-        promises.push(database.setFueltype(enabled));
-        promises.push(firedb.setFueltype(enabled));
-    });
+        let promises = [];
+        _.each(toBeDisabled, (disabled) => {
+            promises.push(database.setFueltype(disabled));
+            promises.push(firedb.setFueltype(disabled));
+        });
 
-    await Promise.all(promises);
+        _.each(toBeEnabled, (enabled) => {
+            promises.push(database.setFueltype(enabled));
+            promises.push(firedb.setFueltype(enabled));
+        });
+
+        const union = _.union(toBeEnabled, toBeDisabled, toBeSame);
+        const hash = utils.hash(union);
+        promises.push(database.setHash('fueltypes', hash));
+        promises.push(firedb.setHash('fueltypes', hash));
+
+        await Promise.all(promises);
+    }
 
     return {
         collection: 'fueltypes',
