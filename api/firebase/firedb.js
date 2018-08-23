@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const admin = require('firebase-admin');
-const log = require('../../util/log');
 const utils = require('../../util/utils');
 
 module.exports = class Database {

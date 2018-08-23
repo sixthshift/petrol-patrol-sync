@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const log = require('../../util/log');
 const MongoClient = require('mongodb').MongoClient;
 const mongoUtils = require('./utils');
 const utils = require('../../util/utils');

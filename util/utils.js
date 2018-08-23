@@ -24,6 +24,15 @@ const difference = (toInspect, toExclude) => {
     return _.differenceWith(toInspect, toExclude, _.isEqual);
 };
 
+/**
+ * Returns an empty promise object
+ * 
+ * @param {*} val A value to return upon resolving the promise
+ * @returns {*} A promise that will resolve to the inputted value
+ */
+const emptyPromise = (val = null) => {
+    return new Promise((resolve) => { resolve(val); });
+};
 
 /**
  * Determines the intersection of objects between the inputted arrays
@@ -34,16 +43,6 @@ const difference = (toInspect, toExclude) => {
 const intersection = (...arrays) => {
     return _.intersectionWith(...arrays, _.isEqual);
 }
-
-/**
- * Returns an empty promise object
- * 
- * @param {*} val A value to return upon resolving the promise
- * @returns {*} A promise that will resolve to the inputted value
- */
-const emptyPromise = (val = null) => {
-    return new Promise((resolve) => { resolve(val); });
-};
 
 /**
  * Generates an SHA1 hash from the input

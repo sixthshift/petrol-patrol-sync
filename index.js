@@ -1,9 +1,7 @@
 #!/usr/bin/node
 
 const _ = require('lodash');
-const constants = require('./constants');
 const log = require('./util/log');
-const time = require('./util/time');
 const utils = require('./util/utils');
 const circularJSON = require('circular-json');
 
