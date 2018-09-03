@@ -47,10 +47,10 @@ module.exports = class Database {
     }
 
     /**
-     * Writes a document to the Firebase database
+     * Writes a document to the Firebase Database
      * 
      * @param {string} collection The collection name in the Firebase database to write to
-     * @param {string} documentID The MongoDB internal id to assign to the document
+     * @param {string} documentID The the Firebase Database internal id to assign to the document
      * @param {object} document The document to write
      * @returns {Promise}
      */
@@ -63,10 +63,10 @@ module.exports = class Database {
     }
 
     /**
-     * Deletes a document from the Firebase database
+     * Deletes a document from the Firebase Database
      * 
      * @param {string} collection The collection name in the Firebase database to delete from
-     * @param {string} documentID The MongoDB internal id of the document to delete
+     * @param {string} documentID The the Firebase Database internal id of the document to delete
      * @returns {Promise}
      */
     async unsetDocument(collection, documentID) {
@@ -78,7 +78,22 @@ module.exports = class Database {
     }
 
     /**
-     * Writes a brand object to MongoDB
+     * Updates an existing document into the Firebase Database
+     * 
+     * @param {string} collection The collection name in the Firebase
+     * @param {string} documentID The the Firebase Database internal id of the document to delete
+     * @returns {Promise}
+     */
+    async updateDocument(collection, documentID, document) {
+        if (this.isInitialised()) {
+            return this.database.ref(collection).child(documentID).update(document);
+        } else {
+            return utils.emptyPromise();
+        }
+    }
+
+    /**
+     * Writes a brand object to the Firebase Database
      * 
      * @param {object} brand The brand object to write
      * @returns {Promise}
@@ -92,7 +107,7 @@ module.exports = class Database {
     }
 
     /**
-     * Writes a fueltype object to MongoDB
+     * Writes a fueltype object to the Firebase Database
      * 
      * @param {object} fueltype The fueltype object to write
      * @returns {Promise}
@@ -106,7 +121,7 @@ module.exports = class Database {
     }
 
     /**
-     * Writes a given hash value associated with the collection to MongoDB
+     * Writes a given hash value associated with the collection to the Firebase Database
      * 
      * @param {string} collection The name of the collection that is hashed
      * @param {string} hash The hash value to be stored
@@ -121,8 +136,22 @@ module.exports = class Database {
         }
     }
 
+    async setStatistics(statistics, timestamp) {
+        if (this.isInitialised()) {
+            const prepareForMerge = (accumulator, value, key) => {
+                const path = key + '/' + timestamp;
+                accumulator[path] = value;
+                return accumulator;
+            };
+            const preparedStatistics = _.reduce(statistics, prepareForMerge, {});
+            return this.updateDocument('statistics', '/', preparedStatistics);
+        } else {
+            return utils.emptyPromise();
+        }
+    }
+
     /**
-     * Writes a price object to MongoDB
+     * Writes a price object to the Firebase Database
      * 
      * @param {object} price The price object to write
      * @returns {Promise}
@@ -137,7 +166,7 @@ module.exports = class Database {
     }
 
     /**
-     * Deletes a price object from MongoDB
+     * Deletes a price object from the Firebase Database
      * 
      * @param {object} price The price object to delete
      * @returns {Promise}
@@ -152,7 +181,7 @@ module.exports = class Database {
     }
 
     /**
-     * Writes a station object to MongoDB
+     * Writes a station object to the Firebase Database
      * 
      * @param {object} station The station object to write
      * @returns {Promise}

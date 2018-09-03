@@ -128,6 +128,58 @@ module.exports = class MongoDB {
     }
 
     /**
+     * Returns a list of fueltypes from MongoDB
+     * 
+     * @returns {[object]} A list of fueltypes
+     */
+    fueltypes() {
+        if (this.isInitialised()) {
+            return _.sortBy(this.fueltypesData, 'order');
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * Returns a list of collection hashes from MongoDB
+     * 
+     * @returns {[object]} A list of collection hashes
+     */
+    hash() {
+        if (this.isInitialised()) {
+            return this.hashData;
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * Returns a list of prices from MongoDB
+     * 
+     * @returns {[object]} A list of prices
+     */
+    prices() {
+        if (this.isInitialised()) {
+            return this.pricesData;
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * Returns a list of stations from MongoDB
+     * 
+     * @returns {[object]} A list of stations
+     */
+    stations() {
+        if (this.isInitialised()) {
+            return this.stationsData;
+        } else {
+            return [];
+        }
+    }
+
+    /**
      * Writes a brand object to MongoDB
      * 
      * @param {object} brand The brand object to write
@@ -142,19 +194,6 @@ module.exports = class MongoDB {
     }
 
     /**
-     * Returns a list of fueltypes from MongoDB
-     * 
-     * @returns {[object]} A list of fueltypes
-     */
-    fueltypes() {
-        if (this.isInitialised()) {
-            return _.sortBy(this.fueltypesData, 'order');
-        } else {
-            return [];
-        }
-    }
-
-    /**
      * Writes a fueltype object to MongoDB
      * 
      * @param {object} fueltype The fueltype object to write
@@ -165,19 +204,6 @@ module.exports = class MongoDB {
             return this.setDocument('fueltypes', fueltype.code, fueltype);
         } else {
             return utils.emptyPromise();
-        }
-    }
-
-    /**
-     * Returns a list of collection hashes from MongoDB
-     * 
-     * @returns {[object]} A list of collection hashes
-     */
-    hash() {
-        if (this.isInitialised()) {
-            return this.hashData;
-        } else {
-            return [];
         }
     }
 
@@ -198,15 +224,16 @@ module.exports = class MongoDB {
     }
 
     /**
-     * Returns a list of prices from MongoDB
+     * Writes a statistics object to MongoDB
      * 
-     * @returns {[object]} A list of prices
+     * @param {object} statistics The statistics object to write
+     * @returns {Promise}
      */
-    prices() {
+    async setStatistics(statistics) {
         if (this.isInitialised()) {
-            return this.pricesData;
+            return this.setDocument('statistics', statistics.timestamp, statistics);
         } else {
-            return [];
+            return utils.emptyPromise();
         }
     }
 
@@ -226,6 +253,20 @@ module.exports = class MongoDB {
     }
 
     /**
+     * Writes a station object to MongoDB
+     * 
+     * @param {object} station The station object to write
+     * @returns {Promise}
+     */
+    async setStation(station) {
+        if (this.isInitialised()) {
+            return this.setDocument('stations', station.id, station);
+        } else {
+            return utils.emptyPromise();
+        }
+    }
+
+    /**
      * Deletes a price object from MongoDB
      * 
      * @param {object} price The price object to delete
@@ -235,33 +276,6 @@ module.exports = class MongoDB {
         if (this.isInitialised()) {
             const hashID = utils.hash(_.pick(price, ['id', 'fueltype']));
             return this.unsetDocument('prices', hashID);
-        } else {
-            return utils.emptyPromise();
-        }
-    }
-
-    /**
-     * Returns a list of stations from MongoDB
-     * 
-     * @returns {[object]} A list of stations
-     */
-    stations() {
-        if (this.isInitialised()) {
-            return this.stationsData;
-        } else {
-            return [];
-        }
-    }
-
-    /**
-     * Writes a station object to MongoDB
-     * 
-     * @param {object} station The station object to write
-     * @returns {Promise}
-     */
-    async setStation(station) {
-        if (this.isInitialised()) {
-            return this.setDocument('stations', station.id, station);
         } else {
             return utils.emptyPromise();
         }

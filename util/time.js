@@ -25,6 +25,18 @@ const epoch = () => {
 };
 
 /**
+ * Rounds down a given moment object to the nearest interval in time
+ * 
+ * @param {moment} time Moment object to be rounded
+ * @param {number} interval The interval in minutes to round the moment object down to
+ * @returns {moment} A moment object rounded down to the nearest interval
+ */
+const floor = (time, interval) => {
+    const minute = _.floor(time.minute / interval) * interval;
+    return time.clone().minutes(minute).seconds(0).milliseconds(0);
+};
+
+/**
  * Fetches a moment object representing current time
  * 
  * @returns {moment} A moment object representing current time
@@ -67,6 +79,8 @@ const parseUnixSeconds = (unixTimeInSeconds) => {
 module.exports = {
     diff,
     epoch,
+    floor,
+    formatString,
     now,
     parseTimestamp,
     parseUnix,

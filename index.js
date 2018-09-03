@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const log = require('./util/log');
+const time = require('./util/time');
 const utils = require('./util/utils');
 const circularJSON = require('circular-json');
 
@@ -14,8 +15,9 @@ const firebaseCredentials = require('./api/firebase/firebase-credentials');
 const fuelcheckCredentials = require('./api/fuelcheck/fuelcheck-credentials');
 const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
 
-syncBrands = async (fuelcheck, database, firedb) => {
+const statistics = require('./statistics/statistics');
 
+syncBrands = async (fuelcheck, database, firedb) => {
     const databaseBrands = database.brands();
     const fuelcheckBrands = fuelcheck.brands();
 
@@ -56,7 +58,6 @@ syncBrands = async (fuelcheck, database, firedb) => {
 };
 
 syncFueltypes = async (fuelcheck, database, firedb) => {
-
     const databaseFueltypes = database.fueltypes();
     const fuelcheckFueltypes = fuelcheck.fueltypes();
 
@@ -97,7 +98,6 @@ syncFueltypes = async (fuelcheck, database, firedb) => {
 };
 
 syncStations = async (fuelcheck, database, firedb) => {
-
     const databaseStations = database.stations();
     const fuelcheckStations = fuelcheck.stations();
 
@@ -126,7 +126,6 @@ syncStations = async (fuelcheck, database, firedb) => {
 };
 
 syncPrices = async (fuelcheck, database, firedb) => {
-
     const databasePrices = database.prices();
     const fuelcheckPrices = fuelcheck.prices();
 
@@ -155,6 +154,34 @@ syncPrices = async (fuelcheck, database, firedb) => {
     };
 }
 
+syncStatistics = async (fuelcheck, database, firedb) => {
+    const now = time.floor(time.now(), 10).unix();
+    const pricesByFueltype = _.groupBy(fuelcheck.prices(), 'fueltype');
+    const calculate = (accumulator, value, key) => {
+        const fueltype = key;
+        const prices = value;
+        accumulator[fueltype] = {
+            max: statistics.max(prices),
+            mean: statistics.mean(prices),
+            median: statistics.median(prices),
+            min: statistics.min(prices),
+        };
+        return accumulator;
+    };
+    const stats = _.reduce(pricesByFueltype, calculate, {});
+
+    let promises = [];
+
+    promises.push(firedb.setStatistics(stats, now));
+
+    await Promise.all(promises);
+
+    return {
+        collection: 'statistics',
+        value: statistics
+    };
+};
+
 main = async () => {
     log.info('Begin sync');
 
@@ -172,17 +199,14 @@ main = async () => {
     const initialisationResults = await Promise.all(initialisationPromises);
     const initialisationErrors = _.filter(initialisationResults, utils.isError);
 
-    if (!_.isEmpty(initialisationErrors)) {
-        _.each(initialisationErrors, (error) => {
-            log.error(circularJSON.stringify(error));
-        });
-    } else {
+    if (_.isEmpty(initialisationErrors)) {
         const syncPromises = [];
 
         syncPromises.push(syncBrands(fuelcheck, mongodb, firedb));
         syncPromises.push(syncFueltypes(fuelcheck, mongodb, firedb));
         syncPromises.push(syncStations(fuelcheck, mongodb, firedb));
         syncPromises.push(syncPrices(fuelcheck, mongodb, firedb));
+        syncPromises.push(syncStatistics(fuelcheck, mongodb, firedb));
 
         const syncResults = await Promise.all(syncPromises);
         _.each(syncResults, (result) => {
@@ -193,6 +217,10 @@ main = async () => {
             log.debug(JSON.stringify(result.enabled));
             log.info(numDisabled + ' disabled in ' + result.collection);
             log.debug(JSON.stringify(result.disabled));
+        });
+    } else {
+        _.each(initialisationErrors, (error) => {
+            log.error(circularJSON.stringify(error));
         });
     }
     log.info('End sync');
