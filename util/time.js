@@ -32,7 +32,7 @@ const epoch = () => {
  * @returns {moment} A moment object rounded down to the nearest interval
  */
 const floor = (time, interval) => {
-    const minute = _.floor(time.minute / interval) * interval;
+    const minute = _.floor(time.minutes() / interval) * interval;
     return time.clone().minutes(minute).seconds(0).milliseconds(0);
 };
 
