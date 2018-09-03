@@ -178,7 +178,8 @@ syncStatistics = async (fuelcheck, database, firedb) => {
 
     return {
         collection: 'statistics',
-        value: statistics
+        enabled: statistics,
+        disabled: []
     };
 };
 

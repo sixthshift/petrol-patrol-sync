@@ -136,6 +136,14 @@ module.exports = class Database {
         }
     }
 
+    /**
+     * Writes a collection of statistics data to the Firebase Database
+     * The statistics data is indexed by the timestamp of calculation
+     * 
+     * @param {*} statistics A dictionary of statistics data grouped by fueltype
+     * @param {*} timestamp The unix time of when the calculations occurred
+     * @returns {Promise}
+     */
     async setStatistics(statistics, timestamp) {
         if (this.isInitialised()) {
             const prepareForMerge = (accumulator, value, key) => {
