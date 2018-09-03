@@ -7,15 +7,15 @@ const utils = require('./util/utils');
 const circularJSON = require('circular-json');
 
 const FireDB = require('./api/firebase/firedb');
-const FuelCheck = require('./api/fuelcheck/fuelcheck');
-const MongoDB = require('./api/mongodb/mongodb');
+const FuelCheck = require('./api/fuelcheck');
+const MongoDB = require('./api/mongodb');
 
 // Credentials need to be retrieved from the corresponding API services.
 const firebaseCredentials = require('./api/firebase/firebase-credentials');
 const fuelcheckCredentials = require('./api/fuelcheck/fuelcheck-credentials');
 const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
 
-const statistics = require('./statistics/statistics');
+const statistics = require('./statistics');
 
 syncBrands = async (fuelcheck, database, firedb) => {
     const databaseBrands = database.brands();
