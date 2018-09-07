@@ -1,10 +1,10 @@
 #!/usr/bin/node
 
 const _ = require('lodash');
+const circularJSON = require('circular-json');
 const log = require('./util/log');
 const time = require('./util/time');
 const utils = require('./util/utils');
-const circularJSON = require('circular-json');
 
 const FireDB = require('./api/firebase/firedb');
 const FuelCheck = require('./api/fuelcheck');

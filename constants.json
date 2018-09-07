@@ -1,5 +1,6 @@
 {
-    "staleThreshold": 30,
+    "accessTokenPath": "api/fuelcheck/accesstoken.json",
     "expiredThreshold": 60,
-    "accessTokenPath": "api/fuelcheck/accesstoken.json"
+    "geohashPrecision": 10,
+    "staleThreshold": 30
 }
