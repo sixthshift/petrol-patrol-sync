@@ -66,8 +66,8 @@ module.exports = class FuelCheck {
                 response: 'Initialisation successful',
             };
         } catch (error) {
-            log.warn('Fetching access token');
             // Not valid access token, fetch new token
+            log.warn('Fetching access token');
             const credentials = fuelcheckUtils.encodeBase64(fuelcheckCredentials.key, fuelcheckCredentials.secret);
             let response = await this.checkOrFetchAccessToken(credentials);
             if (!response.status) {

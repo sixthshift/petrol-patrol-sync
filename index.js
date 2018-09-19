@@ -101,22 +101,34 @@ syncStations = async (fuelcheck, database, firedb) => {
     const databaseStations = database.stations();
     const fuelcheckStations = fuelcheck.stations();
 
-    const toBeEnabled = utils.difference(fuelcheckStations, databaseStations);
-    const toBeDisabled = utils.difference(databaseStations, fuelcheckStations)
-        .map(utils.deactivate);
+    let toBeEnabled = [];
+    let toBeSame = [];
+    let toBeDisabled = [];
 
-    let promises = [];
-    _.each(toBeDisabled, (disabled) => {
-        promises.push(database.setStation(disabled));
-        promises.push(firedb.setStation(disabled));
-    });
+    if (!_.isEqual(databaseStations, fuelcheckStations)) {
+        toBeEnabled = utils.difference(fuelcheckStations, databaseStations);
+        toBeSame = utils.intersection(fuelcheckStations, databaseStations);
+        toBeDisabled = utils.difference(databaseStations, fuelcheckStations)
+            .map(utils.deactivate);
 
-    _.each(toBeEnabled, (enabled) => {
-        promises.push(database.setStation(enabled));
-        promises.push(firedb.setStation(enabled));
-    });
+        let promises = [];
+        _.each(toBeDisabled, (disabled) => {
+            promises.push(database.setStation(disabled));
+            promises.push(firedb.setStation(disabled));
+        });
 
-    await Promise.all(promises);
+        _.each(toBeEnabled, (enabled) => {
+            promises.push(database.setStation(enabled));
+            promises.push(firedb.setStation(enabled));
+        });
+
+        const union = _.union(toBeEnabled, toBeDisabled, toBeSame);
+        const hash = utils.hash(union);
+        promises.push(database.setHash('stations', hash));
+        promises.push(firedb.setHash('stations', hash));
+
+        await Promise.all(promises);
+    }
 
     return {
         collection: 'stations',
