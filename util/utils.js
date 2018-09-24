@@ -51,7 +51,7 @@ const intersection = (...arrays) => {
  * @returns {string} The hash value of the input
  */
 const hash = (data) => {
-    return objectHash(data, { unorderedArrays: true });
+    return objectHash(data, { unorderedArrays: true, unorderedObjects: true });
 };
 
 /**
