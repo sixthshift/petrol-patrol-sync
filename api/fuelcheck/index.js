@@ -182,10 +182,10 @@ module.exports = class FuelCheck {
                         name: station.name,
                         brand: station.brand,
                         active: true,
-                        l: {
-                            0: station.location.latitude,
-                            1: station.location.longitude,
-                        },
+                        l: [
+                            station.location.latitude,
+                            station.location.longitude,
+                        ],
                         g: geohash.encode(station.location.latitude, station.location.longitude, constants.geohashPrecision),
                     }, fuelcheckUtils.splitAddress(station.address));
                 };
