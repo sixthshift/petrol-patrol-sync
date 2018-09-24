@@ -40,10 +40,17 @@ module.exports = class Database {
      */
     async fetchCollection(collection) {
         if (this.isInitialised()) {
-            return (await this.database.ref(collection).once('value')).val();
+            const snapshot = await this.database.ref(collection).once('value');
+            const documents = snapshot.val();
+            const activeDocuments = _.filter(documents, utils.isActive);
+            return activeDocuments;
         } else {
             return [];
         }
+    }
+
+    async fetchStations() {
+        return await this.fetchCollection('stationstest');
     }
 
     /**
