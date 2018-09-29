@@ -177,17 +177,20 @@ module.exports = class FuelCheck {
                 this.fueltypesData = response.data.fueltypes.items.map(rebuildFueltypeData);
 
                 const rebuildStationData = (station) => {
-                    return _.merge({
-                        id: station.code,
-                        name: station.name,
-                        brand: station.brand,
+                    return {
                         active: true,
+                        brand: station.brand,
+                        g: geohash.encode(station.location.latitude, station.location.longitude, constants.geohashPrecision),
+                        id: station.code,
+                        latitude: station.location.latitude,
+                        longitude: station.location.longitude,
                         l: [
                             station.location.latitude,
                             station.location.longitude,
                         ],
-                        g: geohash.encode(station.location.latitude, station.location.longitude, constants.geohashPrecision),
-                    }, fuelcheckUtils.splitAddress(station.address));
+                        name: station.name,
+                        ...fuelcheckUtils.splitAddress(station.address),
+                    }
                 };
                 this.stationsData = response.data.stations.items.map(rebuildStationData);
                 return {
