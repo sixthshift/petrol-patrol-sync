@@ -182,8 +182,10 @@ module.exports = class FuelCheck {
                         brand: station.brand,
                         g: geohash.encode(station.location.latitude, station.location.longitude, constants.geohashPrecision),
                         id: station.code,
-                        latitude: station.location.latitude,
-                        longitude: station.location.longitude,
+                        location: {
+                            latitude: station.location.latitude,
+                            longitude: station.location.longitude,
+                        },
                         l: [
                             station.location.latitude,
                             station.location.longitude,
