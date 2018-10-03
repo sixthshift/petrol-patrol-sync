@@ -177,6 +177,7 @@ syncStatistics = async (fuelcheck, database, firedb) => {
             mean: statistics.mean(prices),
             median: statistics.median(prices),
             min: statistics.min(prices),
+            stdev: statistics.stdev(prices),
         };
         return accumulator;
     };
