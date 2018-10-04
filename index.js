@@ -169,9 +169,7 @@ syncPrices = async (fuelcheck, database, firedb) => {
 syncStatistics = async (fuelcheck, database, firedb) => {
     const now = time.floor(time.now(), 10).unix();
     const pricesByFueltype = _.groupBy(fuelcheck.prices(), 'fueltype');
-    const calculate = (accumulator, value, key) => {
-        const fueltype = key;
-        const prices = value;
+    const calculate = (accumulator, prices, fueltype) => {
         accumulator[fueltype] = {
             max: statistics.max(prices),
             mean: statistics.mean(prices),
@@ -216,10 +214,10 @@ main = async () => {
     if (_.isEmpty(initialisationErrors)) {
         const syncPromises = [];
 
-        syncPromises.push(syncBrands(fuelcheck, mongodb, firedb));
-        syncPromises.push(syncFueltypes(fuelcheck, mongodb, firedb));
-        syncPromises.push(syncStations(fuelcheck, mongodb, firedb));
-        syncPromises.push(syncPrices(fuelcheck, mongodb, firedb));
+        // syncPromises.push(syncBrands(fuelcheck, mongodb, firedb));
+        // syncPromises.push(syncFueltypes(fuelcheck, mongodb, firedb));
+        // syncPromises.push(syncStations(fuelcheck, mongodb, firedb));
+        // syncPromises.push(syncPrices(fuelcheck, mongodb, firedb));
         syncPromises.push(syncStatistics(fuelcheck, mongodb, firedb));
 
         const syncResults = await Promise.all(syncPromises);
