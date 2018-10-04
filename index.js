@@ -214,10 +214,10 @@ main = async () => {
     if (_.isEmpty(initialisationErrors)) {
         const syncPromises = [];
 
-        // syncPromises.push(syncBrands(fuelcheck, mongodb, firedb));
-        // syncPromises.push(syncFueltypes(fuelcheck, mongodb, firedb));
-        // syncPromises.push(syncStations(fuelcheck, mongodb, firedb));
-        // syncPromises.push(syncPrices(fuelcheck, mongodb, firedb));
+        syncPromises.push(syncBrands(fuelcheck, mongodb, firedb));
+        syncPromises.push(syncFueltypes(fuelcheck, mongodb, firedb));
+        syncPromises.push(syncStations(fuelcheck, mongodb, firedb));
+        syncPromises.push(syncPrices(fuelcheck, mongodb, firedb));
         syncPromises.push(syncStatistics(fuelcheck, mongodb, firedb));
 
         const syncResults = await Promise.all(syncPromises);
