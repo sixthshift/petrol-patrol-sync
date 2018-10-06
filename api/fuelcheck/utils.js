@@ -34,7 +34,7 @@ const encodeBase64 = (key, secret) => {
  * @returns {object} An object containing the components of the address string
  */
 const splitAddress = (address) => {
-    let splitAddress = address.split(/(,| NSW | ACT )/);
+    let splitAddress = address.split(/(,(?!.*,)| NSW | ACT )/);
     splitAddress = splitAddress.map((addressPortion) => {
         return addressPortion.trim();
     });
