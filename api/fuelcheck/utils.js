@@ -43,7 +43,7 @@ const splitAddress = (address) => {
         "street": splitAddress[0],
         "suburb": splitAddress[2],
         "state": splitAddress[3],
-        "postcode": splitAddress[4]
+        "postcode": _(splitAddress[4]).toNumber(),
     }
 };
 

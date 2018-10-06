@@ -181,15 +181,15 @@ module.exports = class FuelCheck {
                         active: true,
                         brand: station.brand,
                         g: geohash.encode(station.location.latitude, station.location.longitude, constants.geohashPrecision),
-                        id: station.code,
-                        location: {
-                            latitude: station.location.latitude,
-                            longitude: station.location.longitude,
-                        },
+                        id: _(station.code).toNumber(),
                         l: [
                             station.location.latitude,
                             station.location.longitude,
                         ],
+                        location: {
+                            latitude: station.location.latitude,
+                            longitude: station.location.longitude,
+                        },
                         name: station.name,
                         ...fuelcheckUtils.splitAddress(station.address),
                     }
