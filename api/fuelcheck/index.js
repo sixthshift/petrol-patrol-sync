@@ -230,7 +230,7 @@ module.exports = class FuelCheck {
             .then((response) => {
                 const rebuildPrice = (price) => {
                     return {
-                        id: price.stationcode,
+                        id: _(price.stationcode).toNumber(),
                         fueltype: price.fueltype,
                         price: price.price,
                         time: time.parseTimestamp(price.lastupdated).unix(),
