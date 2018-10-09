@@ -154,7 +154,7 @@ module.exports = class Database {
     async setStatistics(statistics, timestamp) {
         if (this.isInitialised()) {
             const prepareForMerge = (accumulator, value, key) => {
-                const path = key + '/' + timestamp;
+                const path = timestamp + '/' + key;
                 accumulator[path] = value;
                 return accumulator;
             };
