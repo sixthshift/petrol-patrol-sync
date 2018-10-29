@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const constants = require('../constants');
+const stringify = require('json-stable-stringify');
 const objectHash = require('object-hash');
 const time = require('./time');
 
@@ -51,7 +52,8 @@ const intersection = (...arrays) => {
  * @returns {string} The hash value of the input
  */
 const hash = (data) => {
-    return objectHash(data, { unorderedArrays: true, unorderedObjects: true });
+    const serialisedData = stringify(data);
+    return objectHash(serialisedData);
 };
 
 /**
