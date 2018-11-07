@@ -17,6 +17,8 @@ const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
 
 const statistics = require('./statistics');
 
+const now = time.floor(time.now(), 10).unix();
+
 syncBrands = async (fuelcheck, database, firedb) => {
     const databaseBrands = database.brands();
     const fuelcheckBrands = fuelcheck.brands();
@@ -150,6 +152,7 @@ syncPrices = async (fuelcheck, database, firedb) => {
     _.each(toBeUpdated, (updated) => {
         promises.push(database.setPrice(updated));
         promises.push(firedb.setPrice(updated));
+        promises.push(firedb.setHistory(updated, now));
     });
 
     _.each(toBeExpired, (expired) => {
@@ -167,7 +170,7 @@ syncPrices = async (fuelcheck, database, firedb) => {
 }
 
 syncStatistics = async (fuelcheck, database, firedb) => {
-    const now = time.floor(time.now(), 10).unix();
+
     const pricesByFueltype = _.groupBy(fuelcheck.prices(), 'fueltype');
     const calculate = (accumulator, prices, fueltype) => {
         accumulator[fueltype] = {

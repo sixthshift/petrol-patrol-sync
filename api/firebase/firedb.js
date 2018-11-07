@@ -128,6 +128,23 @@ module.exports = class Database {
     }
 
     /**
+     * Archives a price object to the Firebase Database
+     * 
+     * @param {object} price The price object to archive
+     * @param {number} timestamp The unix time of when the calculations occurred
+     * @returns {Promise}
+     */
+    async setHistory(price, timestamp) {
+        if (this.isInitialised()) {
+            const hashID = utils.hash(_.pick(price, ['id', 'fueltype']));
+            const history = { [timestamp]: price };
+            return this.updateDocument('historytest', hashID, history);
+        } else {
+            return utils.emptyPromise();
+        }
+    }
+
+    /**
      * Writes a given hash value associated with the collection to the Firebase Database
      * 
      * @param {string} collection The name of the collection that is hashed
@@ -147,8 +164,8 @@ module.exports = class Database {
      * Writes a collection of statistics data to the Firebase Database
      * The statistics data is indexed by the timestamp of calculation
      * 
-     * @param {*} statistics A dictionary of statistics data grouped by fueltype
-     * @param {*} timestamp The unix time of when the calculations occurred
+     * @param {object} statistics A dictionary of statistics data grouped by fueltype
+     * @param {number} timestamp The unix time of when the calculations occurred
      * @returns {Promise}
      */
     async setStatistics(statistics, timestamp) {
