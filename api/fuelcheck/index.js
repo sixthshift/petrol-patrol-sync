@@ -235,11 +235,11 @@ module.exports = class FuelCheck {
                         price: price.price,
                         time: time.parseTimestamp(price.lastupdated).unix(),
                         stale: utils.isStale(price),
+                        expired: utils.isExpired(price),
                     };
                 };
                 const rebuiltPrices = _.map(response.data.prices, rebuildPrice);
-                const activePrices = _.reject(rebuiltPrices, utils.isExpired);
-                this.pricesData = activePrices;
+                this.pricesData = rebuiltPrices;
                 return {
                     status: true,
                     response: 'Prices data successfully fetched',

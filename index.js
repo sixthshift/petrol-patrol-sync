@@ -151,13 +151,11 @@ syncPrices = async (fuelcheck, database, firedb) => {
 
     _.each(toBeUpdated, (updated) => {
         promises.push(database.setPrice(updated));
-        promises.push(firedb.setPrice(updated));
-        promises.push(firedb.setHistory(updated, now));
+        promises.push(firedb.setPrice(updated, now)); //Firedb never deletes prices, only keeps logging
     });
 
     _.each(toBeExpired, (expired) => {
         promises.push(database.unsetPrice(expired));
-        promises.push(firedb.unsetPrice(expired));
     });
 
     await Promise.all(promises);
