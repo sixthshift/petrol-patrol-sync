@@ -150,8 +150,9 @@ module.exports = class Database {
      * @param {number} timestamp The unix time of when the calculations occurred
      * @returns {Promise}
      */
-    async setPrice(price, timestamp) {
+    async setPrice(price) {
         if (this.isInitialised()) {
+            const timestamp = _(price).get('time');
             const hashID = utils.hash(_.pick(price, ['id', 'fueltype']));
             const preparedPrice = { [timestamp]: price };
             return this.updateDocument('prices', hashID, preparedPrice);
