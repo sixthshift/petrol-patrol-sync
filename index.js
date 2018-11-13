@@ -172,6 +172,7 @@ syncStatistics = async (fuelcheck, database, firedb) => {
     const pricesByFueltype = _.groupBy(fuelcheck.prices(), 'fueltype');
     const calculate = (accumulator, prices, fueltype) => {
         accumulator[fueltype] = {
+            distribution: statistics.distribution(prices),
             max: statistics.max(prices),
             mean: statistics.mean(prices),
             median: statistics.median(prices),
