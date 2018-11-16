@@ -180,6 +180,7 @@ syncStatistics = async (fuelcheck, database, firedb) => {
             stdev: statistics.stdev(prices),
             timestamp: now,
         };
+        accumulator['timestamp'] = now;
         return accumulator;
     };
     const stats = _.reduce(pricesByFueltype, calculate, {});
