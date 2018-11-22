@@ -49,7 +49,7 @@ module.exports = class Analysis {
                     url: tuple[0] + tuple[1].format(tuple[2]),
                 }
             ))
-            .uniq()
+            .uniqWith(_.isEqual)
             .value();
         this.data = null;
     }
@@ -71,8 +71,8 @@ module.exports = class Analysis {
                 const parsedHtml = _($('.rich-text-editor p'))
                     .map((node) => (_.split($(node).text(), '\n')))
                     .flatten()
-                    .filter((segment) => (!_.includes(segment.toLowerCase(), 'nrma')))
-                    .value();
+                    .filter((segment) => (!_.isEmpty(segment) && !_.includes(segment.toLowerCase(), 'nrma')))
+                    .join('\n\n');
                 this.data = {
                     data: parsedHtml,
                     timestamp: timestamp,
