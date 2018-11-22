@@ -112,6 +112,22 @@ const isStale = (price) => {
 };
 
 /**
+ * Generates a cartesian product of the input sets
+ * 
+ * @param  {[any]} arrays An array of arrays to generate the product by
+ * @returns The cartesian product of the input sets
+ */
+const product = (...arrays) => {
+    return _.reduce(arrays, (accumulator, set) => {
+        return _.flatten(_.map(accumulator, (partialProduct) => {
+            return _.map(set, (value) => {
+                return partialProduct.concat([value]);
+            });
+        }));
+    }, [[]]);
+};
+
+/**
  * Sanitises an id value
  * 
  * @param {string} id The value to be sanitised
@@ -131,5 +147,6 @@ module.exports = {
     isError,
     isExpired,
     isStale,
+    product,
     sanitiseID,
 };

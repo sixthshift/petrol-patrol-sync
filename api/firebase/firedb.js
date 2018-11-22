@@ -49,10 +49,6 @@ module.exports = class Database {
         }
     }
 
-    async fetchStations() {
-        return await this.fetchCollection('stationstest');
-    }
-
     /**
      * Writes a document to the Firebase Database
      * 
@@ -94,6 +90,20 @@ module.exports = class Database {
     async updateDocument(collection, documentID, document) {
         if (this.isInitialised()) {
             return this.database.ref(collection).child(documentID).update(document);
+        } else {
+            return utils.emptyPromise();
+        }
+    }
+
+    /**
+     * Writes an analysis object to the Firebase Database
+     * 
+     * @param {object} analysis The analysis object to write
+     * @returns {Promise}
+     */
+    async setAnalysis(analysis) {
+        if (this.isInitialised()) {
+            return this.setDocument('analysis', analysis.timestamp, analysis.data);
         } else {
             return utils.emptyPromise();
         }

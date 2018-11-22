@@ -6,6 +6,7 @@ const log = require('./util/log');
 const time = require('./util/time');
 const utils = require('./util/utils');
 
+const Analysis = require('./api/analysis');
 const FireDB = require('./api/firebase/firedb');
 const FuelCheck = require('./api/fuelcheck');
 const MongoDB = require('./api/mongodb');
@@ -18,6 +19,23 @@ const mongodbCredentials = require('./api/mongodb/mongodb-credentials');
 const statistics = require('./statistics');
 
 const now = time.floor(time.now(), 10).unix();
+
+syncAnalysis = async (analysis, database, firedb) => {
+
+    const parsedAnalysis = analysis.fetch();
+
+    let promises = [];
+
+    promises.push(firedb.setAnalysis(parsedAnalysis));
+
+    await Promise.all(promises);
+
+    return {
+        collection: 'analysis',
+        enabled: parsedAnalysis,
+        disabled: null,
+    };
+};
 
 syncBrands = async (fuelcheck, database, firedb) => {
     const databaseBrands = database.brands();
@@ -194,7 +212,7 @@ syncStatistics = async (fuelcheck, database, firedb) => {
     return {
         collection: 'statistics',
         enabled: statistics,
-        disabled: []
+        disabled: null,
     };
 };
 
@@ -202,6 +220,9 @@ main = async () => {
     log.info('Begin sync');
 
     let initialisationPromises = [];
+
+    const analysis = new Analysis();
+    initialisationPromises.push(analysis.init());
 
     const fuelcheck = new FuelCheck();
     initialisationPromises.push(fuelcheck.init(fuelcheckCredentials));
@@ -223,6 +244,7 @@ main = async () => {
         syncPromises.push(syncStations(fuelcheck, mongodb, firedb));
         syncPromises.push(syncPrices(fuelcheck, mongodb, firedb));
         syncPromises.push(syncStatistics(fuelcheck, mongodb, firedb));
+        syncPromises.push(syncAnalysis(analysis, mongodb, firedb));
 
         const syncResults = await Promise.all(syncPromises);
         _.each(syncResults, (result) => {
