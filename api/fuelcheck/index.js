@@ -233,7 +233,7 @@ module.exports = class FuelCheck {
                         id: _(price.stationcode).toNumber(),
                         fueltype: price.fueltype,
                         price: price.price,
-                        time: time.parseTimestamp(price.lastupdated).unix(),
+                        timestamp: time.parseTimestamp(price.lastupdated).unix(),
                         stale: utils.isStale(price),
                         expired: utils.isExpired(price),
                     };
