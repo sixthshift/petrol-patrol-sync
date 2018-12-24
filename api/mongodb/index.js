@@ -7,6 +7,7 @@ module.exports = class MongoDB {
 
     constructor() {
         this.mongodb = null;
+        this.analysisData = null;
         this.brandsData = null;
         this.fueltypesData = null;
         this.hashData = null;
@@ -36,6 +37,7 @@ module.exports = class MongoDB {
             const mongoClient = await MongoClient.connect(uri);
             this.mongodb = mongoClient.db(mongoCredentials.db);
             [
+                this.analysisData,
                 this.brandsData,
                 this.fueltypesData,
                 this.hashData,
@@ -43,6 +45,7 @@ module.exports = class MongoDB {
                 this.pricesData
             ] = await Promise.all(
                 [
+                    this.fetchCollection('analysis'),
                     this.fetchCollection('brands'),
                     this.fetchCollection('fueltypes'),
                     this.fetchCollection('hash'),
@@ -115,6 +118,19 @@ module.exports = class MongoDB {
     }
 
     /**
+     * returns the current analysis from MongoDB
+     * 
+     * @returns {object}
+     */
+    analysis() {
+        if (this.isInitialised()) {
+            return _.last(this.analysisData);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Returns a list of brands from MongoDB
      * 
      * @returns {[object]} A list of brands
@@ -176,6 +192,19 @@ module.exports = class MongoDB {
             return this.stationsData;
         } else {
             return [];
+        }
+    }
+
+    /**
+     * Writes an analysis object to MongoDB
+     * 
+     * @param {object} analysis 
+     */
+    async setAnalysis(analysis) {
+        if (this.isInitialised()) {
+            return this.setDocument('analysis', analysis.timestamp, { 'data': analysis.data, 'timestamp': analysis.timestamp });
+        } else {
+            return utils.emptyPromise();
         }
     }
 

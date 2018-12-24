@@ -22,18 +22,32 @@ const now = time.floor(time.now(), 10).unix();
 
 syncAnalysis = async (analysis, database, firedb) => {
 
+    const databaseAnalysis = database.analysis();
     const parsedAnalysis = analysis.fetch();
 
-    let promises = [];
+    let toBeEnabled = [];
+    let toBeDisabled = [];
 
-    promises.push(firedb.setAnalysis(parsedAnalysis));
+    if (!_.isEqual(databaseAnalysis, parsedAnalysis)) {
+        toBeEnabled = parsedAnalysis;
+        toBeDisabled = databaseAnalysis;
 
-    await Promise.all(promises);
+        let promises = [];
+
+        promises.push(database.setAnalysis(toBeEnabled));
+        promises.push(firedb.setAnalysis(toBeEnabled));
+
+        const hash = utils.hash(toBeEnabled);
+        promises.push(database.setHash('analysis', hash));
+        promises.push(firedb.setHash('analysis', hash));
+
+        await Promise.all(promises);
+    }
 
     return {
         collection: 'analysis',
-        enabled: parsedAnalysis,
-        disabled: null,
+        enabled: toBeEnabled,
+        disabled: toBeDisabled,
     };
 };
 
