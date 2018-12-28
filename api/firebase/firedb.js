@@ -103,7 +103,7 @@ module.exports = class Database {
      */
     async setAnalysis(analysis) {
         if (this.isInitialised()) {
-            return this.setDocument('analysis', analysis.timestamp, analysis.data);
+            return this.setDocument('analysis', analysis.timestamp, analysis);
         } else {
             return utils.emptyPromise();
         }
