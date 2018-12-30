@@ -43,12 +43,10 @@ module.exports = class Analysis {
         ];
         this.urls = _(utils.product(this.baseURLs, this.mondays, this.formats))
             .sortBy('1')
-            .map((tuple) => (
-                {
-                    timestamp: tuple[1].unix(),
-                    url: tuple[0] + tuple[1].format(tuple[2]),
-                }
-            ))
+            .map((tuple) => ({
+                timestamp: tuple[1].unix(),
+                url: tuple[0] + tuple[1].format(tuple[2]),
+            }))
             .uniqWith(_.isEqual)
             .value();
         this.data = null;

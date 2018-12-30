@@ -202,7 +202,7 @@ module.exports = class MongoDB {
      */
     async setAnalysis(analysis) {
         if (this.isInitialised()) {
-            return this.setDocument('analysis', analysis.timestamp, { 'data': analysis.data, 'timestamp': analysis.timestamp });
+            return this.setDocument('analysis', analysis.timestamp, analysis);
         } else {
             return utils.emptyPromise();
         }
