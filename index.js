@@ -276,8 +276,9 @@ main = async () => {
         });
     }
     log.info('End sync');
+    return _.toInteger(!_.isEmpty(initialisationErrors));
 };
 
-main().then(() => {
-    process.exit();
+main().then((exitCode) => {
+    process.exit(exitCode);
 });
