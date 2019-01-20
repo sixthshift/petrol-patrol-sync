@@ -2,6 +2,7 @@ const _ = require('lodash');
 const axios = require('axios');
 const constants = require('../../constants');
 const fuelcheckUtils = require('./utils');
+const geohash = require('latlon-geohash');
 const jsonfile = require('../../util/jsonfile');
 const log = require('../../util/log');
 const time = require('../../util/time');
@@ -179,6 +180,7 @@ module.exports = class FuelCheck {
                     return {
                         active: true,
                         brand: station.brand,
+                        geohash: geohash.encode(station.location.latitude, station.location.longitude, constants.geohashPrecision),
                         id: _(station.code).toNumber(),
                         location: {
                             latitude: station.location.latitude,
