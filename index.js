@@ -28,7 +28,7 @@ syncAnalysis = async (analysis, database, firedb) => {
     let toBeEnabled = [];
     let toBeDisabled = [];
 
-    if (!_.isEqual(databaseAnalysis, parsedAnalysis)) {
+    if (!_.isNull(parsedAnalysis) && !_.isEqual(databaseAnalysis, parsedAnalysis)) {
         toBeEnabled = parsedAnalysis;
         toBeDisabled = databaseAnalysis;
 

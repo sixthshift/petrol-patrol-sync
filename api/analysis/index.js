@@ -15,6 +15,10 @@ module.exports = class Analysis {
             moment().startOf('isoWeek').subtract(1, 'weeks'),
             moment().startOf('isoWeek'),
         ];
+        this.tuesdays = [
+            moment().startOf('isoWeek').subtract(1, 'weeks').add(1, 'day'),
+            moment().startOf('isoWeek').add(1, 'day'),
+        ];
         this.formats = [
             'D-M-Y',
             'D-MM-Y',
@@ -41,7 +45,7 @@ module.exports = class Analysis {
             'DD-MMM-YYYY',
             'DD-MMMM-YYYY',
         ];
-        this.urls = _(utils.product(this.baseURLs, this.mondays, this.formats))
+        this.urls = _(utils.product(this.baseURLs, [...this.mondays, ...this.tuesdays], this.formats))
             .sortBy('1')
             .map((tuple) => ({
                 timestamp: tuple[1].unix(),
@@ -86,8 +90,9 @@ module.exports = class Analysis {
             }
         } else {
             // None of the formats are valid
+            // Even though this is an error, don't terminate the script
             return {
-                status: false,
+                status: true,
                 response: 'No valid url formats found',
             };
         }
