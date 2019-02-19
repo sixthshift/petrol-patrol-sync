@@ -12,9 +12,9 @@ const FuelCheck = require('./api/fuelcheck');
 const MongoDB = require('./api/mongodb');
 
 // Credentials need to be retrieved from the corresponding API services.
-const firebaseCredentials = require('./credentials/firebase-credentials');
-const fuelcheckCredentials = require('./credentials/fuelcheck-credentials');
-const mongodbCredentials = require('./credentials/mongodb-credentials');
+const firebaseCredentials = require('./credentials/petrol-patrol-sync/firebase-credentials');
+const fuelcheckCredentials = require('./credentials/petrol-patrol-sync/fuelcheck-credentials');
+const mongodbCredentials = require('./credentials/petrol-patrol-sync/mongodb-credentials');
 
 const statistics = require('./statistics');
 
