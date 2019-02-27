@@ -9,6 +9,7 @@ module.exports = class Analysis {
     constructor() {
         this.baseURLs = [
             'https://www.mynrma.com.au/membership/my-nrma-app/fuel-resources/fuel-report-',
+            'https://www.mynrma.com.au/membership/my-nrma-app/fuel-resources/weekly-report/',
             'https://www.mynrma.com.au/membership/my-nrma-app/fuel-resources/weekly-fuel-report/',
         ];
         this.mondays = [
